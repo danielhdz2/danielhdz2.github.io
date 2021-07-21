@@ -1,4 +1,7 @@
 # Proyecto del taller práctico de Git y GitHub
 
-Este proyecto està realizado dentro del taller práctico de la comunidad de Paradigma Indie
+Taller práctico de GIT y GITHUB 
+de la comunidad de Paradigma Indie
+
+Haciendo cambios en los archivos
 
