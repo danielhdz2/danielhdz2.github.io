@@ -4,4 +4,3 @@ Taller práctico de GIT y GITHUB
 de la comunidad de Paradigma Indie
 
 Haciendo cambios en los archivos
-
