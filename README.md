@@ -3,6 +3,7 @@
 Taller práctico de GIT y GITHUB 
 de la comunidad de Paradigma Indie
 
+<<<<<<< HEAD
 Haciendo cambios en los archivos 
 Aquí insertando emojis 🤓
 
@@ -10,3 +11,6 @@ Aquí insertando emojis 🤓
 =======
 # Rama Develop
 >>>>>>> Stashed changes
+=======
+Haciendo cambios en los archivos
+>>>>>>> develop
