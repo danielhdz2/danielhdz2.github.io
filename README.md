@@ -3,7 +3,8 @@
 Taller práctico de GIT y GITHUB 
 de la comunidad de Paradigma Indie
 
-Haciendo cambios en los archivos
+Haciendo cambios en los archivos 
+Aquí insertando emojis 🤓
 
 <<<<<<< Updated upstream
 =======
