@@ -1,286 +1,741 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Control Traslados — Admin</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Control de traslados - Admin y Choferes (PWA, offline)">
   <meta name="theme-color" content="#f5f7fb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <title>Control de Traslados — Login / Admin / Chofer</title>
   <style>
-    :root{--bg:#f5f7fb;--card:#fff;--accent:#4f46e5;--accent-2:#06b6d4;--muted:#6b7280;--pad:16px;--radius:12px;font-family:Inter,system-ui,Arial;}
-    body{margin:0;background:linear-gradient(180deg,#f8fafc, #f5f7fb);color:#081120}
-    .wrap{max-width:1100px;margin:20px auto;padding:12px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;display:grid;place-items:center;font-weight:700}
-    .card{background:var(--card);padding:var(--pad);border-radius:var(--radius);box-shadow:0 6px 18px rgba(2,6,23,0.06);margin-top:12px}
-    button{padding:8px 12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);background:transparent;cursor:pointer}
+    :root{ --bg:#f5f7fb; --card:#ffffff; --muted:#6b7280; --accent:#4f46e5; --accent-2:#06b6d4; --success:#10b981; --danger:#ef4444; --glass: rgba(255,255,255,0.6); --radius:12px; --pad:16px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);color:#0f172a}
+    *{box-sizing:border-box}
+    .center-screen{min-height:100vh;display:grid;place-items:center;padding:20px}
+    .card{background:var(--card);border-radius:var(--radius);padding:var(--pad);box-shadow:0 6px 18px rgba(15,23,42,0.06);width:100%;max-width:980px}
+    h1{margin:0 0 8px 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+    input,select,textarea,button{padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);outline:none;font-size:1rem}
+    textarea{min-height:90px}
+    button{cursor:pointer}
     .primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none}
     .muted{color:var(--muted);font-size:0.9rem}
-    form{display:flex;flex-wrap:wrap;gap:8px}
-    input,select,textarea{padding:10px;border-radius:8px;border:1px solid rgba(2,6,23,0.06);min-width:160px}
-    textarea{min-width:100%}
-    .col{flex:1;min-width:220px}
-    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
-    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(2,6,23,0.04)}
+    .small{font-size:0.85rem;color:var(--muted)}
+    .inline{display:flex;gap:8px;align-items:center}
+    .linklike{background:transparent;border:none;color:var(--accent);text-decoration:underline;cursor:pointer;padding:0}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .controls{display:flex;gap:8px}
+    .item{padding:8px;border-radius:10px;border:1px solid rgba(15,23,42,0.03);display:flex;justify-content:space-between;align-items:center}
+    .ghost{background:transparent;border:1px dashed rgba(15,23,42,0.04);padding:12px;border-radius:10px}
+    .error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(239,68,68,0.06)}
+    .small-muted{font-size:0.9rem;color:#6b7280}
+    .right{margin-left:auto}
+    footer{padding:12px;text-align:center;color:var(--muted);font-size:0.85rem;margin-top:12px}
+    .nav-btns{display:flex;gap:8px}
     .hidden{display:none}
-    .login-area{display:flex;gap:8px;align-items:center}
-    .small{font-size:0.9rem;color:var(--muted)}
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">T</div>
+
+  <!-- LOGIN / REGISTER SCREEN -->
+  <div id="loginScreen" class="center-screen">
+    <div class="card">
+      <div class="topbar">
         <div>
-          <div style="font-weight:700">Control de Traslados — Admin</div>
-          <div class="small">Inicia sesión con Google para continuar</div>
+          <h1>Control de Traslados</h1>
+          <div class="muted">Inicia sesión como Administrador o Chofer. Regístrate si eres chofer nuevo.</div>
+        </div>
+        <div class="nav-btns">
+          <button id="btnGeneratePanels" class="linklike">Generar archivos (admin/driver)</button>
         </div>
       </div>
-      <div class="login-area">
-        <div id="userEmail" class="small muted hidden"></div>
-        <button id="btnSignIn" class="primary">Iniciar con Google</button>
-        <button id="btnSignOut" class="hidden">Cerrar sesión</button>
-      </div>
-    </header>
 
-    <div id="notAuth" class="card">
-      <h3>Acceso requerido</h3>
-      <p class="muted">Debes iniciar sesión con Google para acceder al panel de administrador.</p>
-    </div>
-
-    <div id="panel" class="card hidden" aria-hidden="true">
-      <h3>Panel Administrador</h3>
-
-      <!-- Short controls: export/import, add driver -->
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
-        <div style="flex:1;min-width:260px">
-          <form id="driverForm">
-            <div style="display:flex;gap:8px">
-              <input id="drvName" placeholder="Nombre chofer" required class="col">
-              <input id="drvEmail" placeholder="Email del chofer (ej. correo@gmail.com)" class="col">
-              <button class="primary" type="submit">Agregar</button>
+      <div class="grid">
+        <div>
+          <h3>Iniciar sesión</h3>
+          <form id="loginForm">
+            <label class="small">Usuario</label>
+            <input id="loginUser" placeholder="usuario" required>
+            <label class="small">Contraseña</label>
+            <input id="loginPass" type="password" placeholder="contraseña" required>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button type="submit" class="primary">Entrar</button>
+              <button type="button" id="btnShowRegister">Registrar chofer</button>
             </div>
           </form>
+          <div style="margin-top:10px" class="muted small">Admin por defecto: <strong>admin</strong> / <strong>demo</strong></div>
         </div>
 
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="downloadBackup">Descargar respaldo</button>
-          <input type="file" id="importFile" accept="application/json">
-          <button id="importBackup">Importar respaldo</button>
+        <div id="registerPanel">
+          <h3>Registrar chofer (nuevo)</h3>
+          <form id="registerForm">
+            <label class="small">Nombre completo</label>
+            <input id="regName" placeholder="Juan Pérez" required>
+            <label class="small">Usuario (login)</label>
+            <input id="regUser" placeholder="usuario_chofer" required>
+            <label class="small">Contraseña</label>
+            <input id="regPass" type="password" placeholder="min 4 caracteres" required>
+            <label class="small">Placas / ID</label>
+            <input id="regPlate" placeholder="ABC-1234">
+            <label class="small">Teléfono</label>
+            <input id="regPhone" placeholder="55 1234 5678">
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button type="submit" class="primary">Crear cuenta</button>
+              <button type="button" id="btnHideRegister">Cancelar</button>
+            </div>
+          </form>
+          <div id="registerHint" class="small-muted" style="margin-top:8px">Al crear la cuenta se generará automáticamente el perfil de chofer que podrá usar para iniciar sesión.</div>
         </div>
       </div>
 
-      <hr>
-
-      <h4>Crear viaje</h4>
-      <form id="tripForm" class="card" style="margin-top:8px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input id="origin" placeholder="Origen" required class="col">
-          <input id="destination" placeholder="Destino" required class="col">
-          <select id="selectDriver" class="col"></select>
-          <input id="cost" type="number" placeholder="Costo MXN" min="0" style="width:140px">
-          <input id="date" type="datetime-local" style="width:220px">
-        </div>
-        <div style="margin-top:8px">
-          <textarea id="observations" placeholder="Observaciones (p. ej. #pasajeros)"></textarea>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="primary" type="submit">Crear viaje</button>
-          <button type="button" id="exportAllPdf">Exportar historial (PDF)</button>
-        </div>
-      </form>
-
-      <hr>
-      <h4>Viajes pendientes</h4>
-      <div id="tripsList" class="list"></div>
-
-      <hr>
-      <h4>Choferes registrados</h4>
-      <div id="driversList" class="list"></div>
+      <footer>Los datos se almacenan localmente (localStorage). Para convertir a PWA, usa HTTPS o localhost.</footer>
     </div>
+  </div>
 
-    <div class="small" style="margin-top:10px">
-      Nota: Si es la primera vez que inicias sesión como administrador se te propondrá guardar tu cuenta como administrador local (esto solo controla acceso local).
+  <!-- MAIN APP (hidden until login) -->
+  <div id="appScreen" class="hidden" style="padding:20px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:white;font-weight:700">T</div>
+        <div>
+          <div style="font-weight:700" id="appTitle">Control de Traslados</div>
+          <div class="muted small" id="appSubtitle">Panel</div>
+        </div>
+        <div class="right" style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div id="loggedAs" class="muted small"></div>
+          <button id="btnLogout">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <!-- ADMIN PANEL -->
+      <div id="adminPanel" class="card hidden">
+        <div class="topbar">
+          <h2>Panel Administrador</h2>
+          <div class="controls">
+            <button id="btnOpenAdminFile" class="linklike">Descargar admin.html</button>
+            <button id="btnOpenDriverFile" class="linklike">Descargar driver.html</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:320px">
+            <div class="card" style="padding:12px">
+              <h4>Crear chofer</h4>
+              <form id="driverForm">
+                <label class="small">Nombre del chofer</label>
+                <input id="driverName" placeholder="Ej. Juan Pérez" required>
+                <label class="small">Placas / ID</label>
+                <input id="driverPlate" placeholder="Ej. ABC-1234">
+                <label class="small">Teléfono (opcional)</label>
+                <input id="driverPhone" placeholder="55 1234 5678">
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button type="submit" class="primary">Agregar chofer</button>
+                  <button type="button" id="clearAll">Borrar todo</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card" style="margin-top:12px;padding:12px">
+              <h4>Export / Import</h4>
+              <div style="display:flex;gap:8px;flex-direction:column">
+                <button id="downloadBackup">Descargar respaldo (JSON)</button>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="file" id="importFile" accept="application/json">
+                  <button id="importBackup">Importar respaldo</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button id="downloadManifest">Descargar manifest.json</button>
+                  <button id="downloadSw">Descargar service-worker.js</button>
+                </div>
+                <div class="small-muted" style="margin-top:8px">Nota: para que el service worker funcione debes servir los archivos por HTTPS o en localhost (http://localhost).</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:2;min-width:320px">
+            <div class="card" style="padding:12px;margin-bottom:12px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <div style="flex:1">
+                  <label class="small">Buscar viajes (origen, destino o chofer)</label>
+                  <input id="searchTrips" placeholder="Buscar...">
+                </div>
+                <div style="width:220px">
+                  <label class="small">Filtrar por estado</label>
+                  <select id="filterStatus">
+                    <option value="all">Todos</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="done">Completados</option>
+                  </select>
+                </div>
+              </div>
+              <hr>
+              <form id="tripForm">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <div style="flex:1;min-width:200px">
+                    <label class="small">Origen</label>
+                    <input id="origin" required>
+                  </div>
+                  <div style="flex:1;min-width:200px">
+                    <label class="small">Destino</label>
+                    <input id="destination" required>
+                  </div>
+                  <div style="width:180px">
+                    <label class="small">Chofer</label>
+                    <select id="selectDriver"></select>
+                  </div>
+                  <div style="width:140px">
+                    <label class="small">Costo (MXN)</label>
+                    <input id="cost" type="number" min="0" step="0.01">
+                  </div>
+                  <div style="width:200px">
+                    <label class="small">Fecha y hora</label>
+                    <input id="date" type="datetime-local">
+                  </div>
+                  <div style="flex:1;min-width:200px">
+                    <label class="small">Observaciones</label>
+                    <textarea id="observations" placeholder="Detalles del viaje, número de pasajeros, notas..."></textarea>
+                  </div>
+                  <div style="width:160px">
+                    <label class="small">Teléfono pasajero</label>
+                    <input id="passengerPhone" placeholder="55 1234 5678">
+                  </div>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button class="primary" type="submit">Crear viaje</button>
+                  <button type="button" id="clearTrip">Limpiar</button>
+                  <button type="button" id="exportAllPdf">Exportar historial (PDF)</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card" style="padding:12px">
+              <h4>Viajes</h4>
+              <div id="tripsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER PANEL -->
+      <div id="driverPanel" class="card hidden">
+        <h2>Panel Chofer</h2>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <div>
+            <label class="small">Chofer</label>
+            <select id="driverSelectForView"></select>
+          </div>
+          <div style="flex:1">
+            <label class="small">Buscar en historial</label>
+            <input id="searchHistory" placeholder="Origen, destino o fecha">
+          </div>
+          <div style="margin-left:auto">
+            <button id="btnDriverOpenFile" class="linklike">Descargar driver.html</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:320px">
+            <div class="card" style="padding:12px;margin-bottom:12px">
+              <h4>Viajes asignados</h4>
+              <div id="assignedList"></div>
+            </div>
+            <div class="card" style="padding:12px">
+              <h4>Historial de viajes</h4>
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <button id="driverExportPdf" class="primary">Generar PDF del historial</button>
+                <div class="small-muted">El PDF abrirá la vista de impresión para guardar como archivo.</div>
+              </div>
+              <div id="historyList"></div>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:260px">
+            <div class="card" style="padding:12px">
+              <h4>Mi perfil</h4>
+              <div id="driverProfile" class="muted small"></div>
+              <div style="margin-top:8px">
+                <button id="btnChangePassword">Cambiar contraseña</button>
+              </div>
+            </div>
+            <div class="card" style="padding:12px;margin-top:12px">
+              <h4>Ayuda / Tips</h4>
+              <div class="small-muted">Marca tus viajes como realizados desde este panel. Si necesitas exportar tu historial, usa el botón PDF.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="muted small">Diseñado con ❤️ — Almacenamiento local (localStorage). Guardar/Exportar para respaldo.</footer>
     </div>
   </div>
 
 <script>
-  /*******************************
-   *  ADMIN.HTML - Firebase Auth
-   *  Reemplaza el bloque firebaseConfig con tu propia config de Firebase
-   *******************************/
-  // TODO: REEMPLAZA con tu firebaseConfig
-  const firebaseConfig = /* REPLACE WITH YOUR FIREBASE CONFIG */;
-  // ejemplo:
-  // const firebaseConfig = {
-  //   apiKey: "...",
-  //   authDomain: "tu-proyecto.firebaseapp.com",
-  //   projectId: "...",
-  //   ...
-  // };
+/* =================== STORAGE KEYS & HELPERS =================== */
+const DB_KEY = 'control_traslados_v2';
+const USERS_KEY = 'control_traslados_users_v1';
 
-  // inicializa firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+function loadDB(){ const raw = localStorage.getItem(DB_KEY); if(!raw) return {drivers:[],trips:[],history:[]}; try{return JSON.parse(raw);}catch(e){return {drivers:[],trips:[],history:[]}} }
+function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function loadUsers(){ const raw = localStorage.getItem(USERS_KEY); if(!raw) return {}; try{return JSON.parse(raw);}catch(e){return {}; } }
+function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
 
-  // DOM
-  const btnSignIn = document.getElementById('btnSignIn');
-  const btnSignOut = document.getElementById('btnSignOut');
-  const userEmailEl = document.getElementById('userEmail');
-  const panel = document.getElementById('panel');
-  const notAuth = document.getElementById('notAuth');
+let db = loadDB();
+let users = loadUsers();
 
-  // almacenamiento local (misma estructura que tu app original)
-  const DB_KEY = 'control_traslados_v2';
-  function loadDB(){ const raw = localStorage.getItem(DB_KEY); if(!raw) return {drivers:[],trips:[],history:[],admins:[]}; try{return JSON.parse(raw);}catch(e){return {drivers:[],trips:[],history:[],admins:[]}} }
-  function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-  let db = loadDB();
+/* ===== Seed admin account if missing ===== */
+if(!users.admin){
+  users.admin = { username:'admin', pass:'demo', role:'admin', name:'Administrador' };
+  saveUsers(users);
+}
 
-  // Login
-  btnSignIn.addEventListener('click', ()=> {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(err=>alert('Error login: '+err.message));
-  });
-  btnSignOut.addEventListener('click', ()=> { auth.signOut(); });
-
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      const email = user.email;
-      userEmailEl.textContent = email;
-      userEmailEl.classList.remove('hidden');
-      btnSignIn.classList.add('hidden');
-      btnSignOut.classList.remove('hidden');
-
-      // check if user is admin in local DB
-      const isAdmin = (db.admins||[]).includes(email);
-      if(!isAdmin){
-        // ask to register as admin (first time)
-        if(confirm('¿Deseas registrar esta cuenta ('+email+') como Administrador local? Si no, no podrás acceder al panel.')){
-          db.admins = db.admins || [];
-          db.admins.push(email);
-          saveDB(db);
-          showPanel();
-        } else {
-          // not admin: hide panel
-          showNotAuth();
-        }
-      } else {
-        showPanel();
-      }
-    } else {
-      userEmailEl.classList.add('hidden');
-      btnSignIn.classList.remove('hidden');
-      btnSignOut.classList.add('hidden');
-      showNotAuth();
-    }
-  });
-
-  function showPanel(){
-    panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false');
-    notAuth.classList.add('hidden');
-    renderDrivers(); renderTrips();
-  }
-  function showNotAuth(){
-    panel.classList.add('hidden'); panel.setAttribute('aria-hidden','true');
-    notAuth.classList.remove('hidden');
-  }
-
-  // Elements
-  const driversList = document.getElementById('driversList');
-  const driversSelect = document.getElementById('selectDriver');
-  const driverForm = document.getElementById('driverForm');
-  const drvName = document.getElementById('drvName');
-  const drvEmail = document.getElementById('drvEmail');
-
-  const tripForm = document.getElementById('tripForm');
-  const origin = document.getElementById('origin');
-  const destination = document.getElementById('destination');
-  const cost = document.getElementById('cost');
-  const date = document.getElementById('date');
-  const observations = document.getElementById('observations');
-  const tripsList = document.getElementById('tripsList');
-
-  // add driver
-  driverForm.addEventListener('submit', e=>{
-    e.preventDefault();
-    const name = drvName.value.trim(); const email = drvEmail.value.trim().toLowerCase();
-    if(!name || !email) return alert('Nombre y email requerido');
-    const id = 'd_'+Date.now();
-    db.drivers.push({id,name,googleEmail: email,plate:'',phone:''});
-    saveDB(db);
-    drvName.value=''; drvEmail.value='';
-    renderDrivers();
-    alert('Chofer agregado');
-  });
-
-  function renderDrivers(){
-    driversList.innerHTML=''; driversSelect.innerHTML='';
-    if(!db.drivers || db.drivers.length===0){ driversList.innerHTML = '<div class="muted">No hay choferes registrados</div>'; return; }
-    db.drivers.forEach(d=>{
-      const div = document.createElement('div'); div.className='item';
-      div.innerHTML = `<div><strong>${escapeHtml(d.name)}</strong><div class="small">${escapeHtml(d.googleEmail||'')}</div></div>
-        <div style="display:flex;gap:8px">
-          <button data-id="${d.id}" class="delDriver">Eliminar</button>
-        </div>`;
-      driversList.appendChild(div);
-      const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name + (d.googleEmail? ' — '+d.googleEmail:''); driversSelect.appendChild(opt);
-    });
-    document.querySelectorAll('.delDriver').forEach(b=>b.onclick=()=>{ if(confirm('Eliminar chofer?')){ db.drivers = db.drivers.filter(x=>x.id!==b.dataset.id); saveDB(db); renderDrivers(); }});
-  }
-
-  // create trip
-  tripForm.addEventListener('submit', e=>{
-    e.preventDefault();
-    const o = origin.value.trim(); const dest = destination.value.trim();
-    if(!o || !dest) return alert('Origen y destino requeridos');
-    const t = { id:'t_'+Date.now(), origin:o, destination:dest, driverId: driversSelect.value||null, cost: parseFloat(cost.value)||0, date: date.value? new Date(date.value).toISOString(): new Date().toISOString(), status:'pending', observations: observations.value.trim()||'', passengerPhone:'' };
-    db.trips.push(t); saveDB(db); tripForm.reset(); renderTrips(); alert('Viaje creado');
-  });
-
-  function renderTrips(){
-    tripsList.innerHTML='';
-    const pending = db.trips.filter(t=>t.status==='pending');
-    if(pending.length===0){ tripsList.innerHTML = '<div class="muted">Sin viajes pendientes</div>'; return; }
-    pending.forEach(t=>{
-      const driver = db.drivers.find(d=>d.id===t.driverId) || {};
-      const div = document.createElement('div'); div.className='item';
-      div.innerHTML = `<div><strong>${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</strong>
-        <div class="small">${escapeHtml(driver.name || 'Sin chofer')} • ${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div>
-        <div class="small">${escapeHtml(t.observations||'')}</div></div>
-        <div style="display:flex;gap:8px">
-          <button data-id="${t.id}" class="complete">Marcar realizado</button>
-          <button data-id="${t.id}" class="del">Eliminar</button>
-        </div>`;
-      tripsList.appendChild(div);
-    });
-    tripsList.querySelectorAll('.complete').forEach(b=>b.onclick=()=>{ completeTrip(b.dataset.id); });
-    tripsList.querySelectorAll('.del').forEach(b=>b.onclick=()=>{ if(confirm('Eliminar viaje?')){ db.trips = db.trips.filter(x=>x.id!==b.dataset.id); saveDB(db); renderTrips(); }});
-  }
-
-  function completeTrip(id){
-    const i = db.trips.findIndex(t=>t.id===id); if(i===-1) return;
-    const t = db.trips[i]; t.status='done'; db.history.push({...t, completedAt: (new Date()).toISOString()}); db.trips.splice(i,1); saveDB(db); renderTrips(); alert('Viaje marcado como realizado');
-  }
-
-  // Export / Import
-  const downloadBackup = document.getElementById('downloadBackup');
-  const importFile = document.getElementById('importFile');
-  const importBackup = document.getElementById('importBackup');
-
-  downloadBackup.addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='respaldo_control_traslados.json'; a.click(); URL.revokeObjectURL(a.href); });
-  importBackup.addEventListener('click', ()=>{ const f = importFile.files[0]; if(!f) return alert('Selecciona archivo JSON'); const r = new FileReader(); r.onload = e=>{ try{ const parsed = JSON.parse(e.target.result); if(!confirm('Importar sobrescribirá la base local. Continuar?')) return; db = parsed; saveDB(db); renderDrivers(); renderTrips(); alert('Importado'); }catch(err){ alert('JSON inválido: '+err.message); } }; r.readAsText(f); });
-
-  // Utilities
-  function formatDate(iso){ if(!iso) return '-'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleString(); }
-  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-  // Inicial: crear estructura si no existe
-  if(!db.drivers) db.drivers = []; if(!db.trips) db.trips = []; if(!db.history) db.history = []; if(!db.admins) db.admins = [];
+/* ===== Demo data if empty ===== */
+if(db.drivers.length===0 && db.trips.length===0 && db.history.length===0){
+  db.drivers.push({id:'d_demo',name:'Demo Chofer',plate:'DEMO-1',phone:''});
+  db.trips.push({id:'t_demo1',origin:'Terminal A',destination:'Oficina Central',driverId:'d_demo',cost:120.00,date:new Date().toISOString(),status:'pending',observations:'Ejemplo',passengerPhone:''});
   saveDB(db);
+}
+
+/* =================== DOM Elements =================== */
+// Login/Register
+const loginScreen = document.getElementById('loginScreen');
+const loginForm = document.getElementById('loginForm');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+const btnShowRegister = document.getElementById('btnShowRegister');
+const btnHideRegister = document.getElementById('btnHideRegister');
+const registerPanel = document.getElementById('registerPanel');
+const registerForm = document.getElementById('registerForm');
+const regName = document.getElementById('regName');
+const regUser = document.getElementById('regUser');
+const regPass = document.getElementById('regPass');
+const regPlate = document.getElementById('regPlate');
+const regPhone = document.getElementById('regPhone');
+const btnGeneratePanels = document.getElementById('btnGeneratePanels');
+
+// App
+const appScreen = document.getElementById('appScreen');
+const appTitle = document.getElementById('appTitle');
+const appSubtitle = document.getElementById('appSubtitle');
+const loggedAs = document.getElementById('loggedAs');
+const btnLogout = document.getElementById('btnLogout');
+
+// Panels
+const adminPanel = document.getElementById('adminPanel');
+const driverPanel = document.getElementById('driverPanel');
+
+// Admin controls
+const driverForm = document.getElementById('driverForm');
+const driverName = document.getElementById('driverName');
+const driverPlate = document.getElementById('driverPlate');
+const driverPhone = document.getElementById('driverPhone');
+const clearAll = document.getElementById('clearAll');
+
+const downloadBackup = document.getElementById('downloadBackup');
+const importBackup = document.getElementById('importBackup');
+const importFile = document.getElementById('importFile');
+const downloadManifest = document.getElementById('downloadManifest');
+const downloadSw = document.getElementById('downloadSw');
+
+const driverSelectForView = document.getElementById('driverSelectForView');
+const selectDriver = document.getElementById('selectDriver');
+
+const tripForm = document.getElementById('tripForm');
+const origin = document.getElementById('origin');
+const destination = document.getElementById('destination');
+const costInput = document.getElementById('cost');
+const dateInput = document.getElementById('date');
+const tripsList = document.getElementById('tripsList');
+const searchTrips = document.getElementById('searchTrips');
+const filterStatus = document.getElementById('filterStatus');
+const observations = document.getElementById('observations');
+const passengerPhone = document.getElementById('passengerPhone');
+const clearTrip = document.getElementById('clearTrip');
+const exportAllPdf = document.getElementById('exportAllPdf');
+
+// Driver panel
+const assignedList = document.getElementById('assignedList');
+const historyList = document.getElementById('historyList');
+const searchHistory = document.getElementById('searchHistory');
+const driverExportPdf = document.getElementById('driverExportPdf');
+const driverProfile = document.getElementById('driverProfile');
+const btnChangePassword = document.getElementById('btnChangePassword');
+
+const btnOpenAdminFile = document.getElementById('btnOpenAdminFile');
+const btnOpenDriverFile = document.getElementById('btnOpenDriverFile');
+const btnDriverOpenFile = document.getElementById('btnDriverOpenFile');
+
+/* =================== STATE =================== */
+let currentUser = null; // { username, role, name, driverId? }
+
+/* =================== AUTH FUNCTIONS =================== */
+function showRegister(show){
+  registerPanel.style.display = show ? 'block' : 'block'; // keep visible; register button toggles
+}
+btnShowRegister.addEventListener('click', ()=> { showRegister(true); });
+btnHideRegister.addEventListener('click', ()=> { showRegister(false); });
+
+registerForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const username = regUser.value.trim();
+  const password = regPass.value;
+  const name = regName.value.trim();
+  if(!username || !password || !name) return alert('Completa nombre, usuario y contraseña');
+  if(users[username]) return alert('El usuario ya existe. Elige otro nombre de usuario.');
+  // create driver profile and user
+  const driverId = 'd_'+Date.now();
+  db.drivers.push({ id: driverId, name, plate: regPlate.value.trim(), phone: regPhone.value.trim() });
+  saveDB(db);
+  users[username] = { username, pass: password, role: 'driver', name, driverId };
+  saveUsers(users);
+  alert('Cuenta creada. Ahora puedes iniciar sesión.');
+  registerForm.reset();
+});
+
+loginForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const user = loginUser.value.trim();
+  const pass = loginPass.value;
+  if(!user || !pass) return alert('Completa usuario y contraseña');
+  const u = users[user];
+  if(!u) return alert('Usuario no encontrado. Si eres chofer, regístrate primero.');
+  if(u.pass !== pass) return alert('Contraseña incorrecta');
+  // success
+  currentUser = { username: u.username, role: u.role, name: u.name, driverId: u.driverId };
+  enterAppFor(currentUser);
+});
+
+/* =================== ENTER APP =================== */
+function enterAppFor(user){
+  loginScreen.classList.add('hidden');
+  appScreen.classList.remove('hidden');
+  loggedAs.textContent = `${user.name || user.username} (${user.role})`;
+  if(user.role === 'admin'){
+    showAdmin();
+  } else {
+    showDriverPanelFor(user.driverId);
+  }
+}
+
+/* =================== LOGOUT =================== */
+btnLogout.addEventListener('click', ()=>{
+  if(!confirm('Cerrar sesión?')) return;
+  currentUser = null;
+  appScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  // reset some UI
+  adminPanel.classList.add('hidden');
+  driverPanel.classList.add('hidden');
+});
+
+/* =================== ADMIN VIEW LOGIC =================== */
+function showAdmin(){
+  adminPanel.classList.remove('hidden');
+  driverPanel.classList.add('hidden');
+  appTitle.textContent = 'Control de Traslados';
+  appSubtitle.textContent = 'Panel Administrador';
+  renderAll();
+}
+
+/* add driver (admin) */
+driverForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const name = driverName.value.trim(); if(!name) return alert('Nombre requerido');
+  const id = 'd_'+Date.now();
+  db.drivers.push({id,name,plate:driverPlate.value.trim(),phone:driverPhone.value.trim()});
+  saveDB(db);
+  renderAll();
+  driverForm.reset();
+});
+
+/* render drivers list and select */
+function renderDrivers(){
+  // populate selects
+  selectDriver.innerHTML = '';
+  driverSelectForView.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  if(db.drivers.length === 0){
+    tripsList.innerHTML = '<div class="ghost">No hay choferes. Añade uno arriba.</div>';
+  }
+  db.drivers.forEach(d=>{
+    const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name + (d.plate? ' — '+d.plate : '');
+    selectDriver.appendChild(opt);
+    driverSelectForView.appendChild(opt.cloneNode(true));
+  });
+}
+
+/* TRIPS */
+function validatePhone(p){ if(!p) return true; const cleaned = p.replace(/[^0-9]/g,''); return cleaned.length>=7 && cleaned.length<=15; }
+
+tripForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const o = origin.value.trim(), dest = destination.value.trim();
+  if(!o || !dest) return alert('Origen y destino son requeridos');
+  if(passengerPhone.value && !validatePhone(passengerPhone.value)) return alert('Teléfono pasajero inválido');
+  const t = { id:'t_'+Date.now(), origin:o, destination:dest, driverId: selectDriver.value||null, cost: parseFloat(costInput.value) || 0, date: dateInput.value ? new Date(dateInput.value).toISOString() : new Date().toISOString(), status:'pending', observations: observations.value.trim()||'', passengerPhone: passengerPhone.value.trim()||'' };
+  db.trips.push(t);
+  saveDB(db);
+  tripForm.reset();
+  renderTrips();
+  alert('Viaje creado');
+});
+
+function renderTrips(){
+  const q = (searchTrips.value || '').toLowerCase();
+  const f = filterStatus.value;
+  tripsList.innerHTML = '';
+  const filtered = db.trips.filter(t=>{
+    if(f !== 'all' && t.status !== f) return false;
+    if(!q) return true;
+    const driverName = (db.drivers.find(d=>d.id===t.driverId)||{}).name||'';
+    return (t.origin+t.destination+driverName+(t.cost||'')+t.date+(t.observations||'')).toLowerCase().includes(q);
+  });
+  if(filtered.length === 0) tripsList.innerHTML = '<div class="ghost">No hay viajes.</div>';
+  filtered.forEach(t=>{
+    const driver = db.drivers.find(d=>d.id===t.driverId);
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div>
+      <div style="font-weight:600">${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</div>
+      <div class="muted">${driver? escapeHtml(driver.name):'<i>Sin chofer</i>'} • ${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div>
+      <div class="muted" style="margin-top:6px">${escapeHtml(t.observations||'')}</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      ${t.status === 'pending' ? `<button data-id="${t.id}" data-act="complete" class="primary">Marcar como realizado</button>` : ''}
+      <button data-id="${t.id}" data-act="edit">Editar</button>
+      <button data-id="${t.id}" data-act="del">Eliminar</button>
+    </div>`;
+    tripsList.appendChild(el);
+  });
+  // attach actions
+  tripsList.querySelectorAll('button').forEach(b=>{
+    b.onclick = (ev)=>{
+      const id = ev.target.dataset.id, act = ev.target.dataset.act;
+      if(act === 'complete') completeTrip(id);
+      if(act === 'del') deleteTrip(id);
+      if(act === 'edit') editTrip(id);
+    };
+  });
+}
+
+function completeTrip(id){
+  const idx = db.trips.findIndex(t=>t.id===id); if(idx === -1) return;
+  const t = db.trips[idx];
+  t.status = 'done';
+  db.history.push({...t, completedAt: new Date().toISOString()});
+  db.trips.splice(idx,1);
+  saveDB(db);
+  renderAll();
+}
+function deleteTrip(id){ if(!confirm('Eliminar viaje?')) return; db.trips = db.trips.filter(t=>t.id!==id); saveDB(db); renderAll(); }
+function editTrip(id){
+  const t = db.trips.find(x=>x.id===id);
+  if(!t) return;
+  origin.value = t.origin; destination.value = t.destination; costInput.value = t.cost; dateInput.value = (new Date(t.date)).toISOString().slice(0,16);
+  selectDriver.value = t.driverId || '';
+  observations.value = t.observations || '';
+  passengerPhone.value = t.passengerPhone || '';
+  db.trips = db.trips.filter(x=>x.id!==id); saveDB(db); renderAll();
+}
+
+/* DRIVER PANEL logic */
+function showDriverPanelFor(driverId){
+  adminPanel.classList.add('hidden');
+  driverPanel.classList.remove('hidden');
+  appTitle.textContent = 'Control de Traslados';
+  appSubtitle.textContent = 'Panel Chofer';
+  // select current driver in select (if driverId provided)
+  renderAll();
+  if(driverId){
+    driverSelectForView.value = driverId;
+  }
+  renderDriverAssigned();
+  // show profile
+  const d = db.drivers.find(dd=>dd.id === driverId) || {};
+  driverProfile.innerHTML = `<div><strong>${escapeHtml(d.name||'')}</strong></div><div class="muted">${escapeHtml(d.plate||'')}</div><div class="muted">${escapeHtml(d.phone||'')}</div>`;
+}
+
+/* render assigned and history for driver select */
+driverSelectForView.addEventListener('change', renderDriverAssigned);
+searchHistory.addEventListener('input', renderDriverAssigned);
+
+function renderDriverAssigned(){
+  const id = driverSelectForView.value;
+  assignedList.innerHTML = '';
+  historyList.innerHTML = '';
+  if(!id){ assignedList.innerHTML = '<div class="ghost">Seleccione un chofer</div>'; historyList.innerHTML = '<div class="ghost">Seleccione un chofer</div>'; return; }
+  const assigned = db.trips.filter(t=>t.driverId === id);
+  if(assigned.length === 0) assignedList.innerHTML = '<div class="ghost">Sin viajes asignados</div>';
+  assigned.forEach(t=>{
+    const el = document.createElement('div'); el.className = 'item';
+    el.innerHTML = `<div><div style="font-weight:600">${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</div><div class="muted">${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div><div class="muted">${escapeHtml(t.observations||'')}</div></div><div><button data-id="${t.id}" class="completeAssigned primary">Marcar realizado</button></div>`;
+    assignedList.appendChild(el);
+  });
+  assignedList.querySelectorAll('.completeAssigned').forEach(b=>b.onclick = (e)=> completeTrip(e.target.dataset.id));
+
+  const hist = db.history.filter(h=>h.driverId === id);
+  const q = (searchHistory.value||'').toLowerCase();
+  let showHist = hist;
+  if(q) showHist = hist.filter(h=> (h.origin+h.destination+h.date+(h.observations||'')).toLowerCase().includes(q));
+  if(showHist.length === 0) historyList.innerHTML = '<div class="ghost">Sin historial</div>';
+  showHist.forEach(h=>{
+    const el = document.createElement('div'); el.className = 'item';
+    el.innerHTML = `<div><div style="font-weight:600">${escapeHtml(h.origin)} → ${escapeHtml(h.destination)}</div><div class="muted">${formatDate(h.date)} • Completado: ${formatDate(h.completedAt)} • $${Number(h.cost).toFixed(2)}</div><div class="muted">${escapeHtml(h.observations||'')}</div></div>`;
+    historyList.appendChild(el);
+  });
+}
+
+/* export PDFs (open print window) */
+function generatePrintWindowForHistory(records, title='Historial de viajes'){
+  const win = window.open('','_blank');
+  const style = `
+    <style>body{font-family:Inter,Arial;color:#0f172a;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #e6eef6}th{background:#f1f5f9;text-align:left}h2{margin-top:0}</style>`;
+  const rows = records.map(r=>`<tr><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.destination)}</td><td>${escapeHtml((db.drivers.find(d=>d.id===r.driverId)||{}).name||'')}</td><td>${formatDate(r.date)}</td><td>$${Number(r.cost).toFixed(2)}</td><td>${escapeHtml(r.observations||'')}</td></tr>`).join('');
+  win.document.write(`<html><head><title>${title}</title>${style}</head><body><h2>${title}</h2><table><thead><tr><th>Origen</th><th>Destino</th><th>Chofer</th><th>Fecha</th><th>Costo</th><th>Observaciones</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 600);
+}
+
+driverExportPdf.addEventListener('click', ()=>{
+  const id = driverSelectForView.value; if(!id) return alert('Seleccione un chofer');
+  const records = db.history.filter(h=>h.driverId===id);
+  if(records.length===0) return alert('No hay historial para este chofer');
+  generatePrintWindowForHistory(records, `Historial - ${(db.drivers.find(d=>d.id===id)||{}).name||''}`);
+});
+exportAllPdf.addEventListener('click', ()=>{
+  const records = db.history.slice().sort((a,b)=> new Date(b.completedAt)-new Date(a.completedAt));
+  if(records.length===0) return alert('No hay historial global para exportar');
+  generatePrintWindowForHistory(records, 'Historial global de traslados');
+});
+
+/* =================== BACKUP / RESTORE =================== */
+downloadBackup.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify({db,users},null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'respaldo_control_traslados.json'; a.click(); URL.revokeObjectURL(url);
+});
+importBackup.addEventListener('click', ()=>{
+  const f = importFile.files[0]; if(!f) return alert('Selecciona un archivo JSON');
+  const reader = new FileReader();
+  reader.onload = (e)=> {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed || typeof parsed !== 'object') throw new Error('Formato inválido');
+      if(!confirm('Importar respaldo sobrescribirá la base local y los usuarios. ¿Continuar?')) return;
+      if(parsed.db) db = parsed.db; if(parsed.users) users = parsed.users;
+      saveDB(db); saveUsers(users);
+      renderAll(); alert('Importado correctamente');
+    } catch(err){ alert('Archivo JSON inválido: ' + err.message); }
+  };
+  reader.readAsText(f);
+});
+
+/* =================== MANIFEST / SERVICE WORKER DOWNLOAD =================== */
+const manifestObj = {
+  "name":"Control de Traslados",
+  "short_name":"Traslados",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f5f7fb",
+  "theme_color":"#4f46e5",
+  "icons":[ {"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"} ]
+};
+const swCode = `self.addEventListener('install', event => { self.skipWaiting(); });
+self.addEventListener('activate', event => { clients.claim(); });
+self.addEventListener('fetch', event => { /* add caching logic here if desired */ });`;
+
+downloadManifest.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(manifestObj,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='manifest.json'; a.click(); URL.revokeObjectURL(url);
+});
+downloadSw.addEventListener('click', ()=>{
+  const blob = new Blob([swCode],{type:'application/javascript'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='service-worker.js'; a.click(); URL.revokeObjectURL(url);
+});
+
+/* =================== UTIL / RENDER helpers =================== */
+function renderAll(){
+  renderDrivers();
+  renderTrips();
+  renderDriverAssigned();
+  populateLoggedAs();
+}
+
+function renderDrivers(){
+  // populate selects
+  selectDriver.innerHTML = '';
+  driverSelectForView.innerHTML = '';
+  db.drivers.forEach(d=>{
+    const opt = document.createElement('option'); opt.value=d.id; opt.textContent=d.name + (d.plate? ' — ' + d.plate : '');
+    selectDriver.appendChild(opt);
+    driverSelectForView.appendChild(opt.cloneNode(true));
+  });
+}
+
+searchTrips.addEventListener('input', renderTrips);
+filterStatus.addEventListener('change', renderTrips);
+
+clearAll.addEventListener('click', ()=>{
+  if(!confirm('Borrar toda la base local? Esto eliminará choferes, viajes e historial.')) return;
+  db = {drivers:[],trips:[],history:[]}; users = { admin: users.admin }; // preserve admin if exists
+  saveDB(db); saveUsers(users); renderAll();
+  alert('Base borrada (admin preservado).');
+});
+
+clearTrip.addEventListener('click', ()=> { tripForm.reset(); });
+
+function formatDate(iso){ if(!iso) return '-'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleString(); }
+function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+function populateLoggedAs(){
+  if(currentUser) loggedAs.textContent = `${currentUser.name || currentUser.username} (${currentUser.role})`;
+}
+
+/* change password for driver */
+btnChangePassword && btnChangePassword.addEventListener('click', ()=>{
+  const u = prompt('Ingresa nueva contraseña:'); if(!u) return alert('Contraseña no cambiada'); const username = currentUser && currentUser.username;
+  if(!username) return alert('No hay usuario actual');
+  const usr = users[username]; if(!usr) return alert('Usuario no encontrado');
+  usr.pass = u; saveUsers(users); alert('Contraseña actualizada');
+});
+
+/* generate separate HTML files (admin.html and driver.html) for convenience */
+btnGeneratePanels.addEventListener('click', generatePanelFiles);
+btnOpenAdminFile.addEventListener('click', generateAdminFile);
+btnOpenDriverFile.addEventListener('click', generateDriverFile);
+btnDriverOpenFile.addEventListener('click', generateDriverFile);
+
+function generateAdminFile(){ generateFile('admin.html', createAdminHtml()); }
+function generateDriverFile(){ generateFile('driver.html', createDriverHtml()); }
+function generatePanelFiles(){ generateAdminFile(); generateDriverFile(); alert('Archivos admin.html y driver.html generados como descarga.'); }
+
+function generateFile(filename, content){
+  const blob = new Blob([content], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+}
+
+/* simple templates for admin and driver pages (minimal) — they include a link back to the main app for login */
+function createAdminHtml(){
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - Control Traslados</title></head><body><h2>Admin panel (extracted)</h2><p>Copia este archivo a tu servidor. La versión completa está en la app principal.</p></body></html>`;
+}
+function createDriverHtml(){
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Driver - Control Traslados</title></head><body><h2>Driver panel (extracted)</h2><p>Copia este archivo a tu servidor. La versión completa está en la app principal.</p></body></html>`;
+}
+
+/* =================== SERVICE WORKER registration attempt =================== */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').then(reg=>{
+    console.log('ServiceWorker registrado:', reg);
+  }).catch(err=>{
+    console.log('No se registró service worker (probablemente falta archivo o se ejecuta en file://):', err.message);
+  });
+}
+
+/* =================== INITIAL UI STATE =================== */
+renderAll();
+
+/* If a user was previously logged (optional): no automatic login here for privacy */
+
+/* =================== END =================== */
 </script>
 
 </body>
