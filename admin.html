@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Control Traslados — Admin</title>
+  <meta name="theme-color" content="#f5f7fb">
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--accent:#4f46e5;--accent-2:#06b6d4;--muted:#6b7280;--pad:16px;--radius:12px;font-family:Inter,system-ui,Arial;}
+    body{margin:0;background:linear-gradient(180deg,#f8fafc, #f5f7fb);color:#081120}
+    .wrap{max-width:1100px;margin:20px auto;padding:12px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;display:grid;place-items:center;font-weight:700}
+    .card{background:var(--card);padding:var(--pad);border-radius:var(--radius);box-shadow:0 6px 18px rgba(2,6,23,0.06);margin-top:12px}
+    button{padding:8px 12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);background:transparent;cursor:pointer}
+    .primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none}
+    .muted{color:var(--muted);font-size:0.9rem}
+    form{display:flex;flex-wrap:wrap;gap:8px}
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid rgba(2,6,23,0.06);min-width:160px}
+    textarea{min-width:100%}
+    .col{flex:1;min-width:220px}
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(2,6,23,0.04)}
+    .hidden{display:none}
+    .login-area{display:flex;gap:8px;align-items:center}
+    .small{font-size:0.9rem;color:var(--muted)}
+  </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">T</div>
+        <div>
+          <div style="font-weight:700">Control de Traslados — Admin</div>
+          <div class="small">Inicia sesión con Google para continuar</div>
+        </div>
+      </div>
+      <div class="login-area">
+        <div id="userEmail" class="small muted hidden"></div>
+        <button id="btnSignIn" class="primary">Iniciar con Google</button>
+        <button id="btnSignOut" class="hidden">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div id="notAuth" class="card">
+      <h3>Acceso requerido</h3>
+      <p class="muted">Debes iniciar sesión con Google para acceder al panel de administrador.</p>
+    </div>
+
+    <div id="panel" class="card hidden" aria-hidden="true">
+      <h3>Panel Administrador</h3>
+
+      <!-- Short controls: export/import, add driver -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <div style="flex:1;min-width:260px">
+          <form id="driverForm">
+            <div style="display:flex;gap:8px">
+              <input id="drvName" placeholder="Nombre chofer" required class="col">
+              <input id="drvEmail" placeholder="Email del chofer (ej. correo@gmail.com)" class="col">
+              <button class="primary" type="submit">Agregar</button>
+            </div>
+          </form>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="downloadBackup">Descargar respaldo</button>
+          <input type="file" id="importFile" accept="application/json">
+          <button id="importBackup">Importar respaldo</button>
+        </div>
+      </div>
+
+      <hr>
+
+      <h4>Crear viaje</h4>
+      <form id="tripForm" class="card" style="margin-top:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="origin" placeholder="Origen" required class="col">
+          <input id="destination" placeholder="Destino" required class="col">
+          <select id="selectDriver" class="col"></select>
+          <input id="cost" type="number" placeholder="Costo MXN" min="0" style="width:140px">
+          <input id="date" type="datetime-local" style="width:220px">
+        </div>
+        <div style="margin-top:8px">
+          <textarea id="observations" placeholder="Observaciones (p. ej. #pasajeros)"></textarea>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="primary" type="submit">Crear viaje</button>
+          <button type="button" id="exportAllPdf">Exportar historial (PDF)</button>
+        </div>
+      </form>
+
+      <hr>
+      <h4>Viajes pendientes</h4>
+      <div id="tripsList" class="list"></div>
+
+      <hr>
+      <h4>Choferes registrados</h4>
+      <div id="driversList" class="list"></div>
+    </div>
+
+    <div class="small" style="margin-top:10px">
+      Nota: Si es la primera vez que inicias sesión como administrador se te propondrá guardar tu cuenta como administrador local (esto solo controla acceso local).
+    </div>
+  </div>
+
+<script>
+  /*******************************
+   *  ADMIN.HTML - Firebase Auth
+   *  Reemplaza el bloque firebaseConfig con tu propia config de Firebase
+   *******************************/
+  // TODO: REEMPLAZA con tu firebaseConfig
+  const firebaseConfig = /* REPLACE WITH YOUR FIREBASE CONFIG */;
+  // ejemplo:
+  // const firebaseConfig = {
+  //   apiKey: "...",
+  //   authDomain: "tu-proyecto.firebaseapp.com",
+  //   projectId: "...",
+  //   ...
+  // };
+
+  // inicializa firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // DOM
+  const btnSignIn = document.getElementById('btnSignIn');
+  const btnSignOut = document.getElementById('btnSignOut');
+  const userEmailEl = document.getElementById('userEmail');
+  const panel = document.getElementById('panel');
+  const notAuth = document.getElementById('notAuth');
+
+  // almacenamiento local (misma estructura que tu app original)
+  const DB_KEY = 'control_traslados_v2';
+  function loadDB(){ const raw = localStorage.getItem(DB_KEY); if(!raw) return {drivers:[],trips:[],history:[],admins:[]}; try{return JSON.parse(raw);}catch(e){return {drivers:[],trips:[],history:[],admins:[]}} }
+  function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+  let db = loadDB();
+
+  // Login
+  btnSignIn.addEventListener('click', ()=> {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err=>alert('Error login: '+err.message));
+  });
+  btnSignOut.addEventListener('click', ()=> { auth.signOut(); });
+
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      const email = user.email;
+      userEmailEl.textContent = email;
+      userEmailEl.classList.remove('hidden');
+      btnSignIn.classList.add('hidden');
+      btnSignOut.classList.remove('hidden');
+
+      // check if user is admin in local DB
+      const isAdmin = (db.admins||[]).includes(email);
+      if(!isAdmin){
+        // ask to register as admin (first time)
+        if(confirm('¿Deseas registrar esta cuenta ('+email+') como Administrador local? Si no, no podrás acceder al panel.')){
+          db.admins = db.admins || [];
+          db.admins.push(email);
+          saveDB(db);
+          showPanel();
+        } else {
+          // not admin: hide panel
+          showNotAuth();
+        }
+      } else {
+        showPanel();
+      }
+    } else {
+      userEmailEl.classList.add('hidden');
+      btnSignIn.classList.remove('hidden');
+      btnSignOut.classList.add('hidden');
+      showNotAuth();
+    }
+  });
+
+  function showPanel(){
+    panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false');
+    notAuth.classList.add('hidden');
+    renderDrivers(); renderTrips();
+  }
+  function showNotAuth(){
+    panel.classList.add('hidden'); panel.setAttribute('aria-hidden','true');
+    notAuth.classList.remove('hidden');
+  }
+
+  // Elements
+  const driversList = document.getElementById('driversList');
+  const driversSelect = document.getElementById('selectDriver');
+  const driverForm = document.getElementById('driverForm');
+  const drvName = document.getElementById('drvName');
+  const drvEmail = document.getElementById('drvEmail');
+
+  const tripForm = document.getElementById('tripForm');
+  const origin = document.getElementById('origin');
+  const destination = document.getElementById('destination');
+  const cost = document.getElementById('cost');
+  const date = document.getElementById('date');
+  const observations = document.getElementById('observations');
+  const tripsList = document.getElementById('tripsList');
+
+  // add driver
+  driverForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = drvName.value.trim(); const email = drvEmail.value.trim().toLowerCase();
+    if(!name || !email) return alert('Nombre y email requerido');
+    const id = 'd_'+Date.now();
+    db.drivers.push({id,name,googleEmail: email,plate:'',phone:''});
+    saveDB(db);
+    drvName.value=''; drvEmail.value='';
+    renderDrivers();
+    alert('Chofer agregado');
+  });
+
+  function renderDrivers(){
+    driversList.innerHTML=''; driversSelect.innerHTML='';
+    if(!db.drivers || db.drivers.length===0){ driversList.innerHTML = '<div class="muted">No hay choferes registrados</div>'; return; }
+    db.drivers.forEach(d=>{
+      const div = document.createElement('div'); div.className='item';
+      div.innerHTML = `<div><strong>${escapeHtml(d.name)}</strong><div class="small">${escapeHtml(d.googleEmail||'')}</div></div>
+        <div style="display:flex;gap:8px">
+          <button data-id="${d.id}" class="delDriver">Eliminar</button>
+        </div>`;
+      driversList.appendChild(div);
+      const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name + (d.googleEmail? ' — '+d.googleEmail:''); driversSelect.appendChild(opt);
+    });
+    document.querySelectorAll('.delDriver').forEach(b=>b.onclick=()=>{ if(confirm('Eliminar chofer?')){ db.drivers = db.drivers.filter(x=>x.id!==b.dataset.id); saveDB(db); renderDrivers(); }});
+  }
+
+  // create trip
+  tripForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const o = origin.value.trim(); const dest = destination.value.trim();
+    if(!o || !dest) return alert('Origen y destino requeridos');
+    const t = { id:'t_'+Date.now(), origin:o, destination:dest, driverId: driversSelect.value||null, cost: parseFloat(cost.value)||0, date: date.value? new Date(date.value).toISOString(): new Date().toISOString(), status:'pending', observations: observations.value.trim()||'', passengerPhone:'' };
+    db.trips.push(t); saveDB(db); tripForm.reset(); renderTrips(); alert('Viaje creado');
+  });
+
+  function renderTrips(){
+    tripsList.innerHTML='';
+    const pending = db.trips.filter(t=>t.status==='pending');
+    if(pending.length===0){ tripsList.innerHTML = '<div class="muted">Sin viajes pendientes</div>'; return; }
+    pending.forEach(t=>{
+      const driver = db.drivers.find(d=>d.id===t.driverId) || {};
+      const div = document.createElement('div'); div.className='item';
+      div.innerHTML = `<div><strong>${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</strong>
+        <div class="small">${escapeHtml(driver.name || 'Sin chofer')} • ${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div>
+        <div class="small">${escapeHtml(t.observations||'')}</div></div>
+        <div style="display:flex;gap:8px">
+          <button data-id="${t.id}" class="complete">Marcar realizado</button>
+          <button data-id="${t.id}" class="del">Eliminar</button>
+        </div>`;
+      tripsList.appendChild(div);
+    });
+    tripsList.querySelectorAll('.complete').forEach(b=>b.onclick=()=>{ completeTrip(b.dataset.id); });
+    tripsList.querySelectorAll('.del').forEach(b=>b.onclick=()=>{ if(confirm('Eliminar viaje?')){ db.trips = db.trips.filter(x=>x.id!==b.dataset.id); saveDB(db); renderTrips(); }});
+  }
+
+  function completeTrip(id){
+    const i = db.trips.findIndex(t=>t.id===id); if(i===-1) return;
+    const t = db.trips[i]; t.status='done'; db.history.push({...t, completedAt: (new Date()).toISOString()}); db.trips.splice(i,1); saveDB(db); renderTrips(); alert('Viaje marcado como realizado');
+  }
+
+  // Export / Import
+  const downloadBackup = document.getElementById('downloadBackup');
+  const importFile = document.getElementById('importFile');
+  const importBackup = document.getElementById('importBackup');
+
+  downloadBackup.addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='respaldo_control_traslados.json'; a.click(); URL.revokeObjectURL(a.href); });
+  importBackup.addEventListener('click', ()=>{ const f = importFile.files[0]; if(!f) return alert('Selecciona archivo JSON'); const r = new FileReader(); r.onload = e=>{ try{ const parsed = JSON.parse(e.target.result); if(!confirm('Importar sobrescribirá la base local. Continuar?')) return; db = parsed; saveDB(db); renderDrivers(); renderTrips(); alert('Importado'); }catch(err){ alert('JSON inválido: '+err.message); } }; r.readAsText(f); });
+
+  // Utilities
+  function formatDate(iso){ if(!iso) return '-'; const d = new Date(iso); if(isNaN(d)) return iso; return d.toLocaleString(); }
+  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+  // Inicial: crear estructura si no existe
+  if(!db.drivers) db.drivers = []; if(!db.trips) db.trips = []; if(!db.history) db.history = []; if(!db.admins) db.admins = [];
+  saveDB(db);
+</script>
+
+</body>
+</html>
