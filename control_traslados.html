@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Control de traslados - Admin y Choferes (PWA, offline)">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <title>Control de Traslados — Admin / Chofer (PWA)</title>
+  <style>
+    :root{ --bg:#f5f7fb; --card:#ffffff; --muted:#6b7280; --accent:#4f46e5; --accent-2:#06b6d4; --success:#10b981; --danger:#ef4444; --glass: rgba(255,255,255,0.6); --radius:12px; --pad:16px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);color:#0f172a}
+    *{box-sizing:border-box}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:transparent}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:10px;display:grid;place-items:center;color:white;font-weight:700}
+    .title{font-size:1rem;font-weight:600}
+    main{padding:16px;max-width:1100px;margin:0 auto}
+    .shell{display:grid;grid-template-columns:320px 1fr;gap:16px}
+    @media (max-width:900px){.shell{grid-template-columns:1fr} .sidebar{order:2}}
+    .card{background:var(--card);border-radius:var(--radius);padding:var(--pad);box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .sidebar .card{position:sticky;top:14px}
+    .nav-btns{display:flex;gap:8px;flex-wrap:wrap}
+    button{background:var(--glass);border:1px solid rgba(15,23,42,0.04);padding:8px 12px;border-radius:10px;cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none}
+    .small{font-size:0.85rem;color:var(--muted)}
+    form{display:flex;flex-direction:column;gap:10px}
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);outline:none}
+    textarea{min-height:80px}
+    label.small{font-size:0.8rem;color:var(--muted)}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.03)}
+    .meta{display:flex;gap:12px;align-items:center}
+    .badge{padding:6px 8px;border-radius:999px;font-size:0.8rem}
+    .badge.pending{background:#fff7ed;color:#92400e}
+    .badge.done{background:#ecfdf5;color:#065f46}
+    .controls{display:flex;gap:8px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(15,23,42,0.04)}
+    .muted{color:var(--muted)}
+    .mobilebar{display:none;position:fixed;left:16px;right:16px;bottom:18px;padding:10px;background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(2,6,23,0.08);justify-content:space-between;align-items:center}
+    @media (max-width:700px){.mobilebar{display:flex}} 
+    .driver-panel{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:700px){.driver-panel{grid-template-columns:1fr}}
+    .hint{font-size:0.9rem;color:var(--muted)}
+    .app-like{border-radius:20px;overflow:hidden}
+    .top-search{display:flex;gap:8px}
+    .ghost{background:transparent;border:1px dashed rgba(15,23,42,0.04);padding:12px;border-radius:10px}
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:0.9rem}
+    .error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(239,68,68,0.06)}
+  </style>
+</head>
+<body>
+  <div class="app-like">
+    <header>
+      <div class="brand">
+        <div class="logo">T</div>
+        <div>
+          <div class="title">Control de Traslados</div>
+          <div class="small">Administra asignaciones y seguimiento — PWA (offline)</div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button id="viewAdminBtn" class="primary">Vista Administrador</button>
+        <button id="viewDriverBtn">Vista Chofer</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="shell">
+        <aside class="sidebar card">
+          <h3>Configuración rápida</h3>
+          <div style="margin-top:8px" class="small hint">Crea choferes y asigna viajes. Los datos se guardan localmente en el navegador.</div>
+          <hr>
+          <form id="driverForm">
+            <label class="small">Nombre del chofer</label>
+            <input id="driverName" placeholder="Ej. Juan Pérez" required>
+            <label class="small">Placas / ID</label>
+            <input id="driverPlate" placeholder="Ej. ABC-1234">
+            <label class="small">Teléfono (opcional)</label>
+            <input id="driverPhone" placeholder="55 1234 5678">
+            <div style="display:flex;gap:8px">
+              <button type="submit" class="primary">Agregar chofer</button>
+              <button type="button" id="clearAll">Borrar todo</button>
+            </div>
+          </form>
+          <hr>
+          <div>
+            <h4>Choferes</h4>
+            <div id="driversList" class="list"></div>
+          </div>
+          <hr>
+          <div>
+            <h4>Export / Import</h4>
+            <div style="display:flex;gap:8px;flex-direction:column">
+              <button id="downloadBackup">Descargar respaldo (JSON)</button>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="file" id="importFile" accept="application/json">
+                <button id="importBackup">Importar respaldo</button>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="downloadManifest">Descargar manifest.json</button>
+                <button id="downloadSw">Descargar service-worker.js</button>
+              </div>
+              <div class="hint">Nota: para que el service worker funcione debes servir los archivos por HTTPS o en localhost (http://localhost).</div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="content">
+          <!-- Admin view -->
+          <div id="adminView" class="card">
+            <h2>Panel Administrador</h2>
+            <div class="top-search">
+              <div style="flex:1">
+                <label class="small">Buscar viajes (origen, destino o chofer)</label>
+                <input id="searchTrips" placeholder="Buscar...">
+              </div>
+              <div style="width:260px">
+                <label class="small">Filtrar por estado</label>
+                <select id="filterStatus">
+                  <option value="all">Todos</option>
+                  <option value="pending">Pendientes</option>
+                  <option value="done">Completados</option>
+                </select>
+              </div>
+            </div>
+            <hr>
+            <form id="tripForm">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <div style="flex:1;min-width:200px">
+                  <label class="small">Origen</label>
+                  <input id="origin" required>
+                </div>
+                <div style="flex:1;min-width:200px">
+                  <label class="small">Destino</label>
+                  <input id="destination" required>
+                </div>
+                <div style="width:180px">
+                  <label class="small">Chofer</label>
+                  <select id="selectDriver"></select>
+                </div>
+                <div style="width:140px">
+                  <label class="small">Costo (MXN)</label>
+                  <input id="cost" type="number" min="0" step="0.01">
+                </div>
+                <div style="width:200px">
+                  <label class="small">Fecha y hora</label>
+                  <input id="date" type="datetime-local">
+                </div>
+                <div style="flex:1;min-width:200px">
+                  <label class="small">Observaciones</label>
+                  <textarea id="observations" placeholder="Detalles del viaje, número de pasajeros, notas..."></textarea>
+                </div>
+                <div style="width:160px">
+                  <label class="small">Teléfono pasajero</label>
+                  <input id="passengerPhone" placeholder="55 1234 5678">
+                </div>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <button class="primary" type="submit">Crear viaje</button>
+                <button type="button" id="clearTrip">Limpiar</button>
+                <button type="button" id="exportAllPdf">Exportar historial (PDF)</button>
+              </div>
+            </form>
+
+            <hr>
+            <h4>Viajes</h4>
+            <div id="tripsList"></div>
+          </div>
+
+          <!-- Driver view -->
+          <div id="driverView" class="card" style="display:none">
+            <h2>Panel Chofer</h2>
+            <div class="driver-panel">
+              <div>
+                <label class="small">Selecciona tu chofer</label>
+                <select id="driverSelectForView"></select>
+              </div>
+              <div>
+                <label class="small">Buscar en historial</label>
+                <input id="searchHistory" placeholder="Origen, destino o fecha">
+              </div>
+            </div>
+
+            <hr>
+            <h4>Viajes asignados</h4>
+            <div id="assignedList"></div>
+
+            <hr>
+            <h4>Historial de viajes</h4>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <button id="driverExportPdf" class="primary">Generar PDF del historial</button>
+              <div class="hint">El PDF abrirá la vista de impresión para guardar como archivo.</div>
+            </div>
+            <div id="historyList"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="mobilebar card">
+      <div class="small">Modo app: Control de Traslados</div>
+      <div style="display:flex;gap:8px">
+        <button id="mobileAdmin">Admin</button>
+        <button id="mobileDriver" class="primary">Chofer</button>
+      </div>
+    </div>
+
+    <footer class="small">Diseñado con ❤️ — Almacenamiento local (localStorage). Guardar/Exportar para respaldo.</footer>
+  </div>
+
+  <script>
+    /* ------------------ CONFIG / STORAGE ------------------ */
+    const DB_KEY = 'control_traslados_v2';
+    function loadDB(){ const raw = localStorage.getItem(DB_KEY); if(!raw) return {drivers:[],trips:[],history:[]}; try{return JSON.parse(raw);}catch(e){return {drivers:[],trips:[],history:[]}} }
+    function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+    let db = loadDB();
+
+    /* ------------------ DOM REFS ------------------ */
+    const driversList = document.getElementById('driversList');
+    const driverForm = document.getElementById('driverForm');
+    const driverName = document.getElementById('driverName');
+    const driverPlate = document.getElementById('driverPlate');
+    const driverPhone = document.getElementById('driverPhone');
+    const selectDriver = document.getElementById('selectDriver');
+
+    const tripForm = document.getElementById('tripForm');
+    const origin = document.getElementById('origin');
+    const destination = document.getElementById('destination');
+    const cost = document.getElementById('cost');
+    const date = document.getElementById('date');
+    const tripsList = document.getElementById('tripsList');
+    const searchTrips = document.getElementById('searchTrips');
+    const filterStatus = document.getElementById('filterStatus');
+    const observations = document.getElementById('observations');
+    const passengerPhone = document.getElementById('passengerPhone');
+
+    const viewAdminBtn = document.getElementById('viewAdminBtn');
+    const viewDriverBtn = document.getElementById('viewDriverBtn');
+    const adminView = document.getElementById('adminView');
+    const driverView = document.getElementById('driverView');
+    const driverSelectForView = document.getElementById('driverSelectForView');
+
+    const assignedList = document.getElementById('assignedList');
+    const historyList = document.getElementById('historyList');
+    const driverExportPdf = document.getElementById('driverExportPdf');
+    const exportAllPdf = document.getElementById('exportAllPdf');
+
+    const searchHistory = document.getElementById('searchHistory');
+    const clearAllBtn = document.getElementById('clearAll');
+    const clearTripBtn = document.getElementById('clearTrip');
+
+    const downloadBackup = document.getElementById('downloadBackup');
+    const importBackupBtn = document.getElementById('importBackup');
+    const importFile = document.getElementById('importFile');
+    const downloadManifest = document.getElementById('downloadManifest');
+    const downloadSw = document.getElementById('downloadSw');
+
+    // mobile
+    document.getElementById('mobileAdmin').addEventListener('click', ()=>{showAdmin()});
+    document.getElementById('mobileDriver').addEventListener('click', ()=>{showDriver()});
+
+    // view toggles
+    viewAdminBtn.addEventListener('click', showAdmin);
+    viewDriverBtn.addEventListener('click', showDriver);
+    function showAdmin(){ adminView.style.display='block'; driverView.style.display='none'; }
+    function showDriver(){ adminView.style.display='none'; driverView.style.display='block'; }
+
+    /* ------------------ DRIVERS ------------------ */
+    driverForm.addEventListener('submit', (e)=>{ e.preventDefault(); addDriver(); });
+    function addDriver(){
+      const name = driverName.value.trim(); if(!name) return showFieldError(driverName,'Nombre requerido');
+      const id = 'd_'+Date.now();
+      db.drivers.push({id,name,plate:driverPlate.value.trim(),phone:driverPhone.value.trim()}); saveDB(db); renderAll(); driverForm.reset(); }
+
+    function renderDrivers(){
+      driversList.innerHTML=''; selectDriver.innerHTML=''; driverSelectForView.innerHTML='';
+      if(db.drivers.length===0){ driversList.innerHTML='<div class="ghost">No hay choferes. Añade uno arriba.</div>'; }
+      db.drivers.forEach(d=>{
+        const div=document.createElement('div'); div.className='item';
+        div.innerHTML=`<div class="meta"><div><strong>${escapeHtml(d.name)}</strong><div class="muted">${escapeHtml(d.plate||'')} ${d.phone? '• '+escapeHtml(d.phone): ''}</div></div></div>
+          <div class="controls"><button data-id="${d.id}" class="assignBtn">Asignar</button><button data-id="${d.id}" class="delDriver">Eliminar</button></div>`;
+        driversList.appendChild(div);
+
+        const opt = document.createElement('option'); opt.value=d.id; opt.textContent=d.name + (d.plate? ' — '+d.plate: ''); selectDriver.appendChild(opt);
+        const opt2 = opt.cloneNode(true); driverSelectForView.appendChild(opt2);
+      });
+
+      document.querySelectorAll('.delDriver').forEach(btn=>btn.onclick=(e)=>{ const id=e.target.dataset.id; if(confirm('Eliminar chofer? se eliminarán sus asignaciones.')) deleteDriver(id); });
+      document.querySelectorAll('.assignBtn').forEach(btn=>btn.onclick=(e)=>{ const id=e.target.dataset.id; selectDriver.value = id; alert('Chofer seleccionado en el formulario de viaje.'); });
+    }
+
+    function deleteDriver(id){ db.drivers = db.drivers.filter(d=>d.id!==id); db.trips = db.trips.map(t=> t.driverId===id? {...t, driverId:null}:t ); db.history = db.history.filter(h=>h.driverId!==id); saveDB(db); renderAll(); }
+
+    /* ------------------ TRIPS ------------------ */
+    tripForm.addEventListener('submit', (e)=>{ e.preventDefault(); createTrip(); });
+    function validatePhone(p){ if(!p) return true; // optional
+      const cleaned = p.replace(/[^0-9]/g,''); return cleaned.length>=7 && cleaned.length<=15; }
+    function createTrip(){
+      clearFieldErrors();
+      const o = origin.value.trim(); const dest = destination.value.trim();
+      if(!o) return showFieldError(origin,'Origen requerido');
+      if(!dest) return showFieldError(destination,'Destino requerido');
+      if(passengerPhone.value && !validatePhone(passengerPhone.value)) return showFieldError(passengerPhone,'Teléfono inválido');
+      const t = { id:'t_'+Date.now(), origin:o, destination:dest, driverId: selectDriver.value||null, cost: parseFloat(cost.value)||0, date: date.value? new Date(date.value).toISOString(): new Date().toISOString(), status:'pending', observations:observations.value.trim()||'', passengerPhone:passengerPhone.value.trim()||'' };
+      db.trips.push(t); saveDB(db); tripForm.reset(); renderTrips(); alert('Viaje creado');
+    }
+
+    function renderTrips(){
+      const q = (searchTrips.value||'').toLowerCase(); const f = filterStatus.value;
+      tripsList.innerHTML='';
+      const filtered = db.trips.filter(t=>{
+        if(f!=='all' && t.status!==f) return false;
+        if(!q) return true;
+        const driverName = (db.drivers.find(d=>d.id===t.driverId)||{}).name||'';
+        return (t.origin+t.destination+driverName+(t.cost||'')+t.date+(t.observations||'')).toLowerCase().includes(q);
+      });
+      if(filtered.length===0) tripsList.innerHTML='<div class="ghost">No hay viajes.</div>';
+      filtered.forEach(t=>{
+        const driver = db.drivers.find(d=>d.id===t.driverId);
+        const div=document.createElement('div'); div.className='item';
+        div.innerHTML = `<div><strong>${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</strong>
+          <div class="muted">${driver? escapeHtml(driver.name):'<i>Sin chofer</i>'} • ${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div>
+          <div class="muted" style="margin-top:6px">${escapeHtml(t.observations||'')}</div></div>
+          <div class="controls">
+            ${t.status==='pending'? `<button class="primary" data-id="${t.id}" data-action="complete">Marcar como realizado</button>`:''}
+            <button data-id="${t.id}" data-action="edit">Editar</button>
+            <button data-id="${t.id}" data-action="del">Eliminar</button>
+          </div>`;
+        tripsList.appendChild(div);
+      });
+      tripsList.querySelectorAll('button').forEach(btn=>btn.onclick=(e)=>{ const id=btn.dataset.id; const act=btn.dataset.action; if(act==='complete') completeTrip(id); if(act==='del') deleteTrip(id); if(act==='edit') editTrip(id); });
+    }
+
+    function completeTrip(id){ const idx = db.trips.findIndex(t=>t.id===id); if(idx===-1) return; const t = db.trips[idx]; t.status='done'; db.history.push({...t, completedAt: new Date().toISOString()}); db.trips.splice(idx,1); saveDB(db); renderAll(); }
+    function deleteTrip(id){ if(!confirm('Eliminar viaje?')) return; db.trips = db.trips.filter(t=>t.id!==id); saveDB(db); renderAll(); }
+    function editTrip(id){ const t = db.trips.find(x=>x.id===id); if(!t) return; origin.value=t.origin; destination.value=t.destination; cost.value=t.cost; date.value = (new Date(t.date)).toISOString().slice(0,16); selectDriver.value = t.driverId||''; observations.value = t.observations||''; passengerPhone.value = t.passengerPhone||''; db.trips = db.trips.filter(x=>x.id!==id); saveDB(db); renderAll(); }
+
+    /* ------------------ DRIVER VIEWS ------------------ */
+    driverSelectForView.addEventListener('change', renderDriverAssigned);
+    function renderDriverAssigned(){ const id = driverSelectForView.value; assignedList.innerHTML=''; historyList.innerHTML=''; if(!id){ assignedList.innerHTML='<div class="ghost">Seleccione un chofer</div>'; historyList.innerHTML='<div class="ghost">Seleccione un chofer</div>'; return; }
+      const assigned = db.trips.filter(t=>t.driverId===id);
+      if(assigned.length===0) assignedList.innerHTML='<div class="ghost">Sin viajes asignados</div>';
+      assigned.forEach(t=>{
+        const div=document.createElement('div'); div.className='item';
+        div.innerHTML=`<div><strong>${escapeHtml(t.origin)} → ${escapeHtml(t.destination)}</strong><div class="muted">${formatDate(t.date)} • $${Number(t.cost).toFixed(2)}</div><div class="muted">${escapeHtml(t.observations||'')}</div></div>
+          <div class="controls"><button data-id="${t.id}" class="completeAssigned">Marcar realizado</button></div>`;
+        assignedList.appendChild(div);
+      });
+      assignedList.querySelectorAll('.completeAssigned').forEach(b=>b.onclick=(e)=>{ completeTrip(e.target.dataset.id); });
+
+      const hist = db.history.filter(h=>h.driverId===id); const q = (searchHistory.value||'').toLowerCase();
+      let showHist = hist;
+      if(q) showHist = hist.filter(h=> (h.origin+h.destination+h.date+(h.observations||'')).toLowerCase().includes(q));
+      if(showHist.length===0) historyList.innerHTML='<div class="ghost">Sin historial</div>';
+      showHist.forEach(h=>{
+        const div=document.createElement('div'); div.className='item';
+        div.innerHTML=`<div><strong>${escapeHtml(h.origin)} → ${escapeHtml(h.destination)}</strong><div class="muted">${formatDate(h.date)} • Completado: ${formatDate(h.completedAt)} • $${Number(h.cost).toFixed(2)}</div><div class="muted">${escapeHtml(h.observations||'')}</div></div>`;
+        historyList.appendChild(div);
+      });
+    }
+    searchHistory.addEventListener('input', renderDriverAssigned);
+
+    /* ------------------ EXPORT / PRINT ------------------ */
+    function generatePrintWindowForHistory(records, title='Historial de viajes'){
+      const win = window.open('','_blank');
+      const style = `
+        <style>body{font-family:Inter,Arial;color:#0f172a;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #e6eef6}th{background:#f1f5f9;text-align:left}h2{margin-top:0}</style>`;
+      const rows = records.map(r=>`<tr><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.destination)}</td><td>${escapeHtml((db.drivers.find(d=>d.id===r.driverId)||{}).name||'')}</td><td>${formatDate(r.date)}</td><td>$${Number(r.cost).toFixed(2)}</td><td>${escapeHtml(r.observations||'')}</td></tr>`).join('');
+      win.document.write(`<html><head><title>${title}</title>${style}</head><body><h2>${title}</h2><table><thead><tr><th>Origen</th><th>Destino</th><th>Chofer</th><th>Fecha</th><th>Costo</th><th>Observaciones</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+      win.document.close();
+      win.focus();
+      setTimeout(()=>{ win.print(); }, 600);
+    }
+
+    driverExportPdf.addEventListener('click', ()=>{ const id = driverSelectForView.value; if(!id) return alert('Seleccione un chofer'); const records = db.history.filter(h=>h.driverId===id); if(records.length===0) return alert('No hay historial para este chofer'); generatePrintWindowForHistory(records, `Historial - ${(db.drivers.find(d=>d.id===id)||{}).name||''}`); });
+    exportAllPdf.addEventListener('click', ()=>{ const records = db.history.slice().sort((a,b)=> new Date(b.completedAt)-new Date(a.completedAt)); if(records.length===0) return alert('No hay historial global para exportar'); generatePrintWindowForHistory(records, 'Historial global de traslados'); });
+
+    /* ------------------ BACKUP / RESTORE ------------------ */
+    downloadBackup.addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='respaldo_control_traslados.json'; a.click(); URL.revokeObjectURL(url); });
+    importBackupBtn.addEventListener('click', ()=>{ const f = importFile.files[0]; if(!f) return alert('Selecciona un archivo JSON'); const reader = new FileReader(); reader.onload = (e)=>{ try{ const parsed = JSON.parse(e.target.result); if(!parsed || typeof parsed !== 'object') throw new Error('Formato inválido'); // basic sanity
+        if(!confirm('Importar respaldo sobrescribirá la base local. ¿Continuar?')) return; db = parsed; saveDB(db); renderAll(); alert('Importado correctamente'); }catch(err){ alert('Archivo JSON inválido: '+err.message); } }; reader.readAsText(f); });
+
+    /* ------------------ MANIFEST / SERVICE WORKER DOWNLOAD ------------------ */
+    const manifestObj = {
+      "name":"Control de Traslados",
+      "short_name":"Traslados",
+      "start_url":"./",
+      "display":"standalone",
+      "background_color":"#f5f7fb",
+      "theme_color":"#4f46e5",
+      "icons":[ {"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"} ]
+    };
+    const swCode = `self.addEventListener('install', event => { self.skipWaiting(); });
+self.addEventListener('activate', event => { clients.claim(); });
+self.addEventListener('fetch', event => { /* You can add custom offline logic here */ });`;
+
+    downloadManifest.addEventListener('click', ()=>{ const blob = new Blob([JSON.stringify(manifestObj,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='manifest.json'; a.click(); URL.revokeObjectURL(url); });
+    downloadSw.addEventListener('click', ()=>{ const blob = new Blob([swCode],{type:'application/javascript'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='service-worker.js'; a.click(); URL.revokeObjectURL(url); });
+
+    /* ------------------ RENDER / UTIL ------------------ */
+    function renderAll(){ renderDrivers(); renderTrips(); renderDriverAssigned(); }
+    renderAll();
+    searchTrips.addEventListener('input', renderTrips); filterStatus.addEventListener('change', renderTrips);
+    clearAllBtn.addEventListener('click', ()=>{ if(!confirm('Borrar toda la base local? Esto eliminará choferes, viajes e historial.')) return; db = {drivers:[],trips:[],history:[]}; saveDB(db); renderAll(); });
+    clearTripBtn.addEventListener('click', ()=>{ tripForm.reset(); });
+
+    function formatDate(iso){ if(!iso) return '-'; const d=new Date(iso); if(isNaN(d)) return iso; return d.toLocaleString(); }
+    function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    // field errors
+    function showFieldError(el, msg){ el.classList.add('error'); el.focus(); alert(msg); }
+    function clearFieldErrors(){ document.querySelectorAll('.error').forEach(e=>e.classList.remove('error')); }
+
+    // demo if empty
+    if(db.drivers.length===0 && db.trips.length===0 && db.history.length===0){ db.drivers.push({id:'d_demo',name:'Demo Chofer',plate:'DEMO-1',phone:''}); db.trips.push({id:'t_demo1',origin:'Terminal A',destination:'Oficina Central',driverId:'d_demo',cost:120.00,date:new Date().toISOString(),status:'pending',observations:'Ejemplo',passengerPhone:''}); saveDB(db); renderAll(); }
+
+    /* ------------------ SERVICE WORKER REGISTRATION (optional) ------------------ */
+    if('serviceWorker' in navigator){
+      // Try to register a service worker at /service-worker.js. This will only succeed when
+      // the file exists at the same origin and is served over HTTPS or localhost.
+      navigator.serviceWorker.register('/service-worker.js').then(reg=>{
+        console.log('ServiceWorker registrado:', reg);
+      }).catch(err=>{
+        console.log('No se registró service worker (puede deberse a file:// o falta de archivo):', err.message);
+      });
+    }
+
+    /* ------------------ END ------------------ */
+  </script>
+
+  <!--
+    Información adicional:
+    - Guarda los siguientes dos archivos en el mismo directorio que este HTML para que la PWA funcione:
+      1) manifest.json  (usa el botón "Descargar manifest.json" para obtenerlo rápidamente)
+      2) service-worker.js (usa el botón "Descargar service-worker.js")
+    - Para poder instalar la PWA y registrar el service worker debes servir los archivos por HTTPS o usar http://localhost.
+    - Iconos (icon-192.png / icon-512.png) son sugeridos en el manifest; agrega imágenes reales si quieres una experiencia completa.
+  -->
+
+</body>
+</html>
