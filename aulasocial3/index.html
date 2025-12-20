@@ -1,0 +1,1562 @@
+//Prototipo 3
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Sprint - Proyectos de Impacto Social</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #5B9BD5;
+            --secondary: #70AD47;
+            --accent: #FFC000;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-light: #6C757D;
+            --border: #DEE2E6;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #E8F4F8 0%, #F5F9FC 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--bg-white);
+            padding: 30px 0;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease forwards;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .progress-container {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px var(--shadow);
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease 0.2s forwards;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .stages-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stage-btn {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .stage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .stage-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .stage-btn.completed {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .content-section {
+            background: var(--bg-white);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px var(--shadow);
+            margin-bottom: 30px;
+            display: none;
+            opacity: 0;
+            animation: fadeInScale 0.5s ease forwards;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .image-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: var(--bg-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(91, 155, 213, 0.05);
+        }
+
+        .image-upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(91, 155, 213, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            opacity: 0;
+            animation: fadeInScale 0.3s ease forwards;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-remove-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.1);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4A8BC2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 155, 213, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5F9639;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(112, 173, 71, 0.3);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--text-dark);
+        }
+
+        .btn-accent:hover {
+            background: #E6AC00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 192, 0, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.4s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .stage-info {
+            background: linear-gradient(135deg, #E8F4F8 0%, #F0F8FF 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stage-info h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+            }
+
+            .stages-nav {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .image-preview-container {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .stages-nav {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🚀 Design Sprint</h1>
+            <p class="subtitle">Sistema de Construcción de Proyectos de Impacto Social</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="progress-container">
+            <h3 style="margin-bottom: 15px; color: var(--text-dark);">Progreso del Proyecto</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <p style="text-align: center; color: var(--text-light); font-size: 0.9rem;">
+                <span id="progressText">0% Completado</span>
+            </p>
+            
+            <div class="stages-nav">
+                <button class="stage-btn active" data-stage="0">Día 1: Comprender</button>
+                <button class="stage-btn" data-stage="1">Día 2: Idear</button>
+                <button class="stage-btn" data-stage="2">Día 3: Decidir</button>
+                <button class="stage-btn" data-stage="3">Día 4: Prototipar</button>
+                <button class="stage-btn" data-stage="4">Día 5: Validar</button>
+            </div>
+        </div>
+
+        <!-- Día 1: Comprender -->
+        <div class="content-section active" data-section="0">
+            <div class="stage-info">
+                <h3>📋 Día 1: Comprender el Problema</h3>
+                <p>Define claramente el problema social que deseas resolver y establece los objetivos del proyecto.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre del Proyecto</label>
+                <input type="text" id="nombreProyecto" placeholder="Ingresa el nombre de tu proyecto">
+            </div>
+
+            <div class="form-group">
+                <label>Problema Social a Resolver</label>
+                <textarea id="problema" placeholder="Describe el problema social que identificaste..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Objetivo General</label>
+                <textarea id="objetivo" placeholder="¿Qué deseas lograr con este proyecto?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Público Objetivo</label>
+                <input type="text" id="publicoObjetivo" placeholder="¿A quién va dirigido este proyecto?">
+            </div>
+
+            <div class="form-group">
+                <label>Imágenes de Referencia</label>
+                <input type="file" id="fileInput0" accept="image/*" multiple>
+                <div class="image-upload-area" onclick="document.getElementById('fileInput0').click()" 
+                     ondrop="handleDrop(event, 0)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📸</div>
+                    <p>Haz clic o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">PNG, JPG hasta 5MB</p>
+                </div>
+                <div class="image-preview-container" id="imagePreview0"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-primary" onclick="saveStage(0)">💾 Guardar Avance</button>
+                <button class="btn-secondary" onclick="nextStage(0)">Siguiente: Idear →</button>
+            </div>
+        </div>
+
+        <!-- Día 2: Idear -->
+        <div class="content-section" data-section="1">
+            <div class="stage-info">
+                <h3>💡 Día 2: Idear Soluciones</h3>
+                <p>Genera ideas creativas y propuestas de solución para abordar el problema identificado.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Ideas de Solución</label>
+                <textarea id="ideas" placeholder="Describe las diferentes ideas de solución que propones..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Recursos Necesarios</label>
+                <textarea id="recursos" placeholder="¿Qué recursos necesitas para implementar estas soluciones?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Posibles Aliados</label>
+                <input type="text" id="aliados" placeholder="Organizaciones, instituciones o personas que podrían colaborar">
+            </div>
+
+            <div class="form-group">
+                <label>Bocetos e Ideas Visuales</label>
+                <input type="file" id="fileInput1" accept="image/*" multiple>
+                <div class="image-upload-area" onclick="document.getElementById('fileInput1').click()" 
+                     ondrop="handleDrop(event, 1)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📸</div>
+                    <p>Haz clic o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">PNG, JPG hasta 5MB</p>
+                </div>
+                <div class="image-preview-container" id="imagePreview1"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-outline" onclick="prevStage(1)">← Anterior</button>
+                <button class="btn-primary" onclick="saveStage(1)">💾 Guardar Avance</button>
+                <button class="btn-secondary" onclick="nextStage(1)">Siguiente: Decidir →</button>
+            </div>
+        </div>
+
+        <!-- Día 3: Decidir -->
+        <div class="content-section" data-section="2">
+            <div class="stage-info">
+                <h3>🎯 Día 3: Decidir la Mejor Solución</h3>
+                <p>Selecciona la mejor propuesta y define la estrategia de implementación.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Solución Seleccionada</label>
+                <textarea id="solucionSeleccionada" placeholder="Describe la solución que has elegido y por qué..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Estrategia de Implementación</label>
+                <textarea id="estrategia" placeholder="¿Cómo implementarás esta solución?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Indicadores de Éxito</label>
+                <textarea id="indicadores" placeholder="¿Cómo medirás el éxito del proyecto?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Diagramas y Esquemas</label>
+                <input type="file" id="fileInput2" accept="image/*" multiple>
+                <div class="image-upload-area" onclick="document.getElementById('fileInput2').click()" 
+                     ondrop="handleDrop(event, 2)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📸</div>
+                    <p>Haz clic o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">PNG, JPG hasta 5MB</p>
+                </div>
+                <div class="image-preview-container" id="imagePreview2"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-outline" onclick="prevStage(2)">← Anterior</button>
+                <button class="btn-primary" onclick="saveStage(2)">💾 Guardar Avance</button>
+                <button class="btn-secondary" onclick="nextStage(2)">Siguiente: Prototipar →</button>
+            </div>
+        </div>
+
+        <!-- Día 4: Prototipar -->
+        <div class="content-section" data-section="3">
+            <div class="stage-info">
+                <h3>🔨 Día 4: Prototipar la Solución</h3>
+                <p>Crea un prototipo o modelo inicial de tu proyecto de impacto social.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción del Prototipo</label>
+                <textarea id="prototipo" placeholder="Describe el prototipo o modelo que desarrollarás..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Cronograma de Actividades</label>
+                <textarea id="cronograma" placeholder="Define las actividades y tiempos de implementación..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Presupuesto Estimado</label>
+                <input type="text" id="presupuesto" placeholder="Costo aproximado del proyecto">
+            </div>
+
+            <div class="form-group">
+                <label>Imágenes del Prototipo</label>
+                <input type="file" id="fileInput3" accept="image/*" multiple>
+                <div class="image-upload-area" onclick="document.getElementById('fileInput3').click()" 
+                     ondrop="handleDrop(event, 3)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📸</div>
+                    <p>Haz clic o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">PNG, JPG hasta 5MB</p>
+                </div>
+                <div class="image-preview-container" id="imagePreview3"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-outline" onclick="prevStage(3)">← Anterior</button>
+                <button class="btn-primary" onclick="saveStage(3)">💾 Guardar Avance</button>
+                <button class="btn-secondary" onclick="nextStage(3)">Siguiente: Validar →</button>
+            </div>
+        </div>
+
+        <!-- Día 5: Validar -->
+        <div class="content-section" data-section="4">
+            <div class="stage-info">
+                <h3>✅ Día 5: Validar y Evaluar</h3>
+                <p>Evalúa la viabilidad del proyecto y planifica los siguientes pasos.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Resultados Esperados</label>
+                <textarea id="resultados" placeholder="¿Qué resultados esperas obtener?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Riesgos y Mitigación</label>
+                <textarea id="riesgos" placeholder="Identifica posibles riesgos y cómo mitigarlos..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Sostenibilidad del Proyecto</label>
+                <textarea id="sostenibilidad" placeholder="¿Cómo garantizarás la sostenibilidad a largo plazo?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Responsable del Proyecto</label>
+                <input type="text" id="responsable" placeholder="Nombre del responsable">
+            </div>
+
+            <div class="form-group">
+                <label>Email de Contacto</label>
+                <input type="email" id="email" placeholder="correo@ejemplo.com">
+            </div>
+
+            <div class="form-group">
+                <label>Documentación de Resultados</label>
+                <input type="file" id="fileInput4" accept="image/*" multiple>
+                <div class="image-upload-area" onclick="document.getElementById('fileInput4').click()" 
+                     ondrop="handleDrop(event, 4)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📸</div>
+                    <p>Haz clic o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">PNG, JPG hasta 5MB</p>
+                </div>
+                <div class="image-preview-container" id="imagePreview4"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-outline" onclick="prevStage(4)">← Anterior</button>
+                <button class="btn-primary" onclick="saveStage(4)">💾 Guardar Avance</button>
+                <button class="btn-accent" onclick="generatePDF()">📄 Generar PDF</button>
+                <button class="btn-secondary" onclick="generateDocument()">📝 Generar Documento</button>
+                <button class="btn-primary" onclick="exportProject()">💾 Exportar Proyecto</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Librerías externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js"></script>
+
+    <script>
+        let currentStage = 0;
+        const totalStages = 5;
+        let projectData = {
+            images: {
+                0: [],
+                1: [],
+                2: [],
+                3: [],
+                4: []
+            }
+        };
+
+        window.onload = function() {
+            loadProjectData();
+            updateProgress();
+            setupFileInputs();
+        };
+
+        function setupFileInputs() {
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`fileInput${i}`).addEventListener('change', function(e) {
+                    handleFiles(e.target.files, i);
+                });
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e, stage) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            handleFiles(files, stage);
+        }
+
+        function handleFiles(files, stage) {
+            for (let file of files) {
+                if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = {
+                            data: e.target.result,
+                            name: file.name
+                        };
+                        projectData.images[stage].push(imageData);
+                        displayImages(stage);
+                        saveToLocalStorage();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showNotification('❌ Archivo no válido o muy grande (máx 5MB)');
+                }
+            }
+        }
+
+        function displayImages(stage) {
+            const container = document.getElementById(`imagePreview${stage}`);
+            container.innerHTML = '';
+            
+            projectData.images[stage].forEach((img, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                preview.innerHTML = `
+                    <img src="${img.data}" alt="${img.name}">
+                    <button class="image-remove-btn" onclick="removeImage(${stage}, ${index})">×</button>
+                `;
+                container.appendChild(preview);
+            });
+        }
+
+        function removeImage(stage, index) {
+            projectData.images[stage].splice(index, 1);
+            displayImages(stage);
+            saveToLocalStorage();
+            showNotification('🗑️ Imagen eliminada');
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateProgress() {
+            let totalFields = 0;
+            let filledFields = 0;
+
+            const fields = [
+                'nombreProyecto', 'problema', 'objetivo', 'publicoObjetivo',
+                'ideas', 'recursos', 'aliados',
+                'solucionSeleccionada', 'estrategia', 'indicadores',
+                'prototipo', 'cronograma', 'presupuesto',
+                'resultados', 'riesgos', 'sostenibilidad', 'responsable', 'email'
+            ];
+
+            fields.forEach(field => {
+                totalFields++;
+                if (projectData[field] && projectData[field].trim() !== '') {
+                    filledFields++;
+                }
+            });
+
+            for (let i = 0; i < 5; i++) {
+                totalFields++;
+                if (projectData.images[i] && projectData.images[i].length > 0) {
+                    filledFields++;
+                }
+            }
+
+            const percentage = Math.round((filledFields / totalFields) * 100);
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '% Completado';
+
+            document.querySelectorAll('.stage-btn').forEach((btn, index) => {
+                if (index < currentStage) {
+                    btn.classList.add('completed');
+                    btn.classList.remove('active');
+                } else if (index === currentStage) {
+                    btn.classList.add('active');
+                    btn.classList.remove('completed');
+                } else {
+                    btn.classList.remove('active', 'completed');
+                }
+            });
+        }
+
+        function saveStageData(stage) {
+            switch(stage) {
+                case 0:
+                    projectData.nombreProyecto = document.getElementById('nombreProyecto').value;
+                    projectData.problema = document.getElementById('problema').value;
+                    projectData.objetivo = document.getElementById('objetivo').value;
+                    projectData.publicoObjetivo = document.getElementById('publicoObjetivo').value;
+                    break;
+                case 1:
+                    projectData.ideas = document.getElementById('ideas').value;
+                    projectData.recursos = document.getElementById('recursos').value;
+                    projectData.aliados = document.getElementById('aliados').value;
+                    break;
+                case 2:
+                    projectData.solucionSeleccionada = document.getElementById('solucionSeleccionada').value;
+                    projectData.estrategia = document.getElementById('estrategia').value;
+                    projectData.indicadores = document.getElementById('indicadores').value;
+                    break;
+                case 3:
+                    projectData.prototipo = document.getElementById('prototipo').value;
+                    projectData.cronograma = document.getElementById('cronograma').value;
+                    projectData.presupuesto = document.getElementById('presupuesto').value;
+                    break;
+                case 4:
+                    projectData.resultados = document.getElementById('resultados').value;
+                    projectData.riesgos = document.getElementById('riesgos').value;
+                    projectData.sostenibilidad = document.getElementById('sostenibilidad').value;
+                    projectData.responsable = document.getElementById('responsable').value;
+                    projectData.email = document.getElementById('email').value;
+                    break;
+            }
+        }
+
+        function loadStageData(stage) {
+            switch(stage) {
+                case 0:
+                    if (projectData.nombreProyecto) document.getElementById('nombreProyecto').value = projectData.nombreProyecto;
+                    if (projectData.problema) document.getElementById('problema').value = projectData.problema;
+                    if (projectData.objetivo) document.getElementById('objetivo').value = projectData.objetivo;
+                    if (projectData.publicoObjetivo) document.getElementById('publicoObjetivo').value = projectData.publicoObjetivo;
+                    break;
+                case 1:
+                    if (projectData.ideas) document.getElementById('ideas').value = projectData.ideas;
+                    if (projectData.recursos) document.getElementById('recursos').value = projectData.recursos;
+                    if (projectData.aliados) document.getElementById('aliados').value = projectData.aliados;
+                    break;
+                case 2:
+                    if (projectData.solucionSeleccionada) document.getElementById('solucionSeleccionada').value = projectData.solucionSeleccionada;
+                    if (projectData.estrategia) document.getElementById('estrategia').value = projectData.estrategia;
+                    if (projectData.indicadores) document.getElementById('indicadores').value = projectData.indicadores;
+                    break;
+                case 3:
+                    if (projectData.prototipo) document.getElementById('prototipo').value = projectData.prototipo;
+                    if (projectData.cronograma) document.getElementById('cronograma').value = projectData.cronograma;
+                    if (projectData.presupuesto) document.getElementById('presupuesto').value = projectData.presupuesto;
+                    break;
+                case 4:
+                    if (projectData.resultados) document.getElementById('resultados').value = projectData.resultados;
+                    if (projectData.riesgos) document.getElementById('riesgos').value = projectData.riesgos;
+                    if (projectData.sostenibilidad) document.getElementById('sostenibilidad').value = projectData.sostenibilidad;
+                    if (projectData.responsable) document.getElementById('responsable').value = projectData.responsable;
+                    if (projectData.email) document.getElementById('email').value = projectData.email;
+                    break;
+            }
+            displayImages(stage);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('designSprintProject', JSON.stringify(projectData));
+        }
+
+        function saveStage(stage) {
+            saveStageData(stage);
+            saveToLocalStorage();
+            showNotification('✓ Progreso guardado exitosamente');
+            updateProgress();
+        }
+
+        function loadProjectData() {
+            const saved = localStorage.getItem('designSprintProject');
+            if (saved) {
+                projectData = JSON.parse(saved);
+                loadStageData(currentStage);
+            }
+        }
+
+        function nextStage(current) {
+            saveStageData(current);
+            saveToLocalStorage();
+            
+            if (current < totalStages - 1) {
+                document.querySelector(`[data-section="${current}"]`).classList.remove('active');
+                currentStage = current + 1;
+                document.querySelector(`[data-section="${currentStage}"]`).classList.add('active');
+                loadStageData(currentStage);
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function prevStage(current) {
+            saveStageData(current);
+            saveToLocalStorage();
+            
+            if (current > 0) {
+                document.querySelector(`[data-section="${current}"]`).classList.remove('active');
+                currentStage = current - 1;
+                document.querySelector(`[data-section="${currentStage}"]`).classList.add('active');
+                loadStageData(currentStage);
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.querySelectorAll('.stage-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetStage = parseInt(this.dataset.stage);
+                saveStageData(currentStage);
+                saveToLocalStorage();
+                
+                document.querySelector(`[data-section="${currentStage}"]`).classList.remove('active');
+                currentStage = targetStage;
+                document.querySelector(`[data-section="${currentStage}"]`).classList.add('active');
+                loadStageData(currentStage);
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        function generatePDF() {
+            saveStageData(currentStage);
+            saveToLocalStorage();
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let yPosition = 20;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 20;
+            const maxWidth = pageWidth - (margin * 2);
+            
+            // Función para agregar nueva página si es necesario
+            function checkPageBreak(neededSpace) {
+                if (yPosition + neededSpace > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = 20;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Función para texto con salto de línea automático
+            function addWrappedText(text, x, y, maxWidth, lineHeight = 7) {
+                const lines = doc.splitTextToSize(text || 'Sin especificar', maxWidth);
+                lines.forEach((line, index) => {
+                    checkPageBreak(lineHeight);
+                    doc.text(line, x, y + (index * lineHeight));
+                });
+                return lines.length * lineHeight;
+            }
+            
+            // Encabezado principal
+            doc.setFillColor(91, 155, 213);
+            doc.rect(0, 0, pageWidth, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text('PROYECTO DE IMPACTO SOCIAL', pageWidth / 2, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Metodología Design Sprint - 5 Días', pageWidth / 2, 30, { align: 'center' });
+            
+            yPosition = 50;
+            doc.setTextColor(44, 62, 80);
+            
+            // Nombre del proyecto
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(91, 155, 213);
+            addWrappedText(projectData.nombreProyecto || 'Proyecto sin nombre', margin, yPosition, maxWidth);
+            yPosition += 15;
+            
+            // Línea separadora
+            doc.setDrawColor(91, 155, 213);
+            doc.setLineWidth(0.5);
+            doc.line(margin, yPosition, pageWidth - margin, yPosition);
+            yPosition += 10;
+            
+            // DÍA 1: COMPRENDER
+            doc.setFillColor(91, 155, 213);
+            doc.rect(margin, yPosition, maxWidth, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('DÍA 1: COMPRENDER EL PROBLEMA', margin + 5, yPosition + 7);
+            yPosition += 15;
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Problema Social:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.problema, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Objetivo General:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.objetivo, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Público Objetivo:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.publicoObjetivo, margin, yPosition, maxWidth);
+            yPosition += 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(108, 117, 125);
+            doc.text(`Imágenes adjuntas: ${projectData.images[0]?.length || 0}`, margin, yPosition);
+            yPosition += 15;
+            
+            // DÍA 2: IDEAR
+            checkPageBreak(30);
+            doc.setFillColor(112, 173, 71);
+            doc.rect(margin, yPosition, maxWidth, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('DÍA 2: IDEAR SOLUCIONES', margin + 5, yPosition + 7);
+            yPosition += 15;
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Ideas de Solución:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.ideas, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Recursos Necesarios:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.recursos, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Posibles Aliados:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.aliados, margin, yPosition, maxWidth);
+            yPosition += 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(108, 117, 125);
+            doc.text(`Imágenes adjuntas: ${projectData.images[1]?.length || 0}`, margin, yPosition);
+            yPosition += 15;
+            
+            // DÍA 3: DECIDIR
+            checkPageBreak(30);
+            doc.setFillColor(255, 192, 0);
+            doc.rect(margin, yPosition, maxWidth, 10, 'F');
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('DÍA 3: DECIDIR LA MEJOR SOLUCIÓN', margin + 5, yPosition + 7);
+            yPosition += 15;
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Solución Seleccionada:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.solucionSeleccionada, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Estrategia de Implementación:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.estrategia, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Indicadores de Éxito:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.indicadores, margin, yPosition, maxWidth);
+            yPosition += 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(108, 117, 125);
+            doc.text(`Imágenes adjuntas: ${projectData.images[2]?.length || 0}`, margin, yPosition);
+            yPosition += 15;
+            
+            // DÍA 4: PROTOTIPAR
+            checkPageBreak(30);
+            doc.setFillColor(91, 155, 213);
+            doc.rect(margin, yPosition, maxWidth, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('DÍA 4: PROTOTIPAR LA SOLUCIÓN', margin + 5, yPosition + 7);
+            yPosition += 15;
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Descripción del Prototipo:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.prototipo, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Cronograma de Actividades:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.cronograma, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Presupuesto Estimado:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.presupuesto, margin, yPosition, maxWidth);
+            yPosition += 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(108, 117, 125);
+            doc.text(`Imágenes adjuntas: ${projectData.images[3]?.length || 0}`, margin, yPosition);
+            yPosition += 15;
+            
+            // DÍA 5: VALIDAR
+            checkPageBreak(30);
+            doc.setFillColor(112, 173, 71);
+            doc.rect(margin, yPosition, maxWidth, 10, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('DÍA 5: VALIDAR Y EVALUAR', margin + 5, yPosition + 7);
+            yPosition += 15;
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Resultados Esperados:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.resultados, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Riesgos y Mitigación:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.riesgos, margin, yPosition, maxWidth);
+            yPosition += 8;
+            
+            checkPageBreak(20);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Sostenibilidad del Proyecto:', margin, yPosition);
+            yPosition += 6;
+            
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            yPosition += addWrappedText(projectData.sostenibilidad, margin, yPosition, maxWidth);
+            yPosition += 5;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(108, 117, 125);
+            doc.text(`Imágenes adjuntas: ${projectData.images[4]?.length || 0}`, margin, yPosition);
+            yPosition += 15;
+            
+            // INFORMACIÓN DE CONTACTO
+            checkPageBreak(30);
+            doc.setFillColor(248, 249, 250);
+            doc.rect(margin, yPosition, maxWidth, 25, 'F');
+            
+            doc.setTextColor(44, 62, 80);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('INFORMACIÓN DE CONTACTO', margin + 5, yPosition + 8);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Responsable: ${projectData.responsable || 'Sin especificar'}`, margin + 5, yPosition + 15);
+            doc.text(`Email: ${projectData.email || 'Sin especificar'}`, margin + 5, yPosition + 21);
+            
+            // Pie de página
+            const totalPages = doc.internal.pages.length - 1;
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(108, 117, 125);
+                doc.text(
+                    `Página ${i} de ${totalPages}`,
+                    pageWidth / 2,
+                    pageHeight - 10,
+                    { align: 'center' }
+                );
+                doc.text(
+                    `Generado: ${new Date().toLocaleDateString('es-MX')}`,
+                    margin,
+                    pageHeight - 10
+                );
+            }
+            
+            // Guardar PDF
+            doc.save(`${projectData.nombreProyecto || 'proyecto'}_design_sprint.pdf`);
+            showNotification('✓ PDF generado exitosamente');
+        }
+
+        function generateDocument() {
+            saveStageData(currentStage);
+            saveToLocalStorage();
+            
+            const htmlContent = `
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+    <meta charset='utf-8'>
+    <title>${projectData.nombreProyecto || 'Proyecto Design Sprint'}</title>
+    <style>
+        @page {
+            size: 8.5in 11in;
+            margin: 1in;
+        }
+        body {
+            font-family: Calibri, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #000000;
+        }
+        h1 {
+            color: #5B9BD5;
+            font-size: 24pt;
+            text-align: center;
+            border-bottom: 3pt solid #5B9BD5;
+            padding-bottom: 10pt;
+            margin-bottom: 20pt;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666666;
+            font-size: 12pt;
+            margin-bottom: 30pt;
+        }
+        h2 {
+            color: #FFFFFF;
+            background-color: #5B9BD5;
+            padding: 8pt 12pt;
+            font-size: 14pt;
+            margin-top: 20pt;
+            margin-bottom: 10pt;
+            page-break-after: avoid;
+        }
+        h2.green {
+            background-color: #70AD47;
+        }
+        h2.yellow {
+            background-color: #FFC000;
+            color: #000000;
+        }
+        h3 {
+            color: #2C3E50;
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+            page-break-after: avoid;
+        }
+        p {
+            margin: 6pt 0;
+            text-align: justify;
+        }
+        .content-box {
+            background-color: #F8F9FA;
+            padding: 12pt;
+            margin: 8pt 0;
+            border-left: 4pt solid #5B9BD5;
+            page-break-inside: avoid;
+        }
+        .label {
+            font-weight: bold;
+            color: #2C3E50;
+        }
+        .images-count {
+            font-style: italic;
+            color: #6C757D;
+            font-size: 9pt;
+            margin-top: 4pt;
+        }
+        .contact-box {
+            background-color: #F8F9FA;
+            padding: 15pt;
+            margin-top: 20pt;
+            border: 1pt solid #DEE2E6;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30pt;
+            padding-top: 15pt;
+            border-top: 1pt solid #DEE2E6;
+            color: #6C757D;
+            font-size: 9pt;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <h1>${projectData.nombreProyecto || 'PROYECTO DE IMPACTO SOCIAL'}</h1>
+    <p class="subtitle">Metodología Design Sprint - 5 Días</p>
+
+    <h2>📋 DÍA 1: COMPRENDER EL PROBLEMA</h2>
+    
+    <div class="content-box">
+        <h3>Problema Social</h3>
+        <p>${projectData.problema || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Objetivo General</h3>
+        <p>${projectData.objetivo || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Público Objetivo</h3>
+        <p>${projectData.publicoObjetivo || 'Sin especificar'}</p>
+    </div>
+
+    <p class="images-count">📸 Imágenes de referencia adjuntas: ${projectData.images[0]?.length || 0}</p>
+
+    <h2 class="green">💡 DÍA 2: IDEAR SOLUCIONES</h2>
+    
+    <div class="content-box">
+        <h3>Ideas de Solución</h3>
+        <p>${projectData.ideas || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Recursos Necesarios</h3>
+        <p>${projectData.recursos || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Posibles Aliados</h3>
+        <p>${projectData.aliados || 'Sin especificar'}</p>
+    </div>
+
+    <p class="images-count">📸 Bocetos e ideas visuales adjuntas: ${projectData.images[1]?.length || 0}</p>
+
+    <h2 class="yellow">🎯 DÍA 3: DECIDIR LA MEJOR SOLUCIÓN</h2>
+    
+    <div class="content-box">
+        <h3>Solución Seleccionada</h3>
+        <p>${projectData.solucionSeleccionada || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Estrategia de Implementación</h3>
+        <p>${projectData.estrategia || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Indicadores de Éxito</h3>
+        <p>${projectData.indicadores || 'Sin especificar'}</p>
+    </div>
+
+    <p class="images-count">📸 Diagramas y esquemas adjuntos: ${projectData.images[2]?.length || 0}</p>
+
+    <div class="page-break"></div>
+
+    <h2>🔨 DÍA 4: PROTOTIPAR LA SOLUCIÓN</h2>
+    
+    <div class="content-box">
+        <h3>Descripción del Prototipo</h3>
+        <p>${projectData.prototipo || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Cronograma de Actividades</h3>
+        <p>${projectData.cronograma || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Presupuesto Estimado</h3>
+        <p>${projectData.presupuesto || 'Sin especificar'}</p>
+    </div>
+
+    <p class="images-count">📸 Imágenes del prototipo adjuntas: ${projectData.images[3]?.length || 0}</p>
+
+    <h2 class="green">✅ DÍA 5: VALIDAR Y EVALUAR</h2>
+    
+    <div class="content-box">
+        <h3>Resultados Esperados</h3>
+        <p>${projectData.resultados || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Riesgos y Mitigación</h3>
+        <p>${projectData.riesgos || 'Sin especificar'}</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Sostenibilidad del Proyecto</h3>
+        <p>${projectData.sostenibilidad || 'Sin especificar'}</p>
+    </div>
+
+    <p class="images-count">📸 Documentación de resultados adjunta: ${projectData.images[4]?.length || 0}</p>
+
+    <div class="contact-box">
+        <h3>📧 INFORMACIÓN DE CONTACTO</h3>
+        <p><span class="label">Responsable del Proyecto:</span> ${projectData.responsable || 'Sin especificar'}</p>
+        <p><span class="label">Correo Electrónico:</span> ${projectData.email || 'Sin especificar'}</p>
+    </div>
+
+    <div class="footer">
+        <p><strong>Documento generado:</strong> ${new Date().toLocaleDateString('es-MX', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        })}</p>
+        <p>Sistema de Proyectos de Impacto Social - Metodología Design Sprint</p>
+    </div>
+</body>
+</html>`;
+
+            // Convertir HTML a Blob con formato compatible con Word
+            const blob = new Blob(['\ufeff', htmlContent], {
+                type: 'application/msword'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectData.nombreProyecto || 'proyecto'}_design_sprint.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showNotification('✓ Documento Word generado exitosamente');
+        }
+
+        function exportProject() {
+            saveStageData(currentStage);
+            saveToLocalStorage();
+            
+            // Crear objeto con todos los datos del proyecto
+            const exportData = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                projectName: projectData.nombreProyecto || 'Proyecto sin nombre',
+                data: projectData
+            };
+            
+            // Convertir a JSON
+            const jsonString = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Crear enlace de descarga
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectData.nombreProyecto || 'proyecto'}_backup.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('✓ Proyecto exportado exitosamente');
+        }
+    </script>
+</body>
+</html>
