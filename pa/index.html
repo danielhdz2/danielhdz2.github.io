@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Investigación - UNEA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">ALIAT Universidades | Conexxión</div>
+        <button id="installBtn" style="display:none;">Instalar App</button>
+    </header>
+
+    <main id="app-container">
+        <section id="selector-screen">
+            <h1>Bienvenido, Docente/Alumno</h1>
+            <p>Selecciona el tipo de artículo que deseas redactar:</p>
+            <div class="grid-options">
+                <button onclick="app.loadForm('original')">Investigación Original</button>
+                <button onclick="app.loadForm('revision')">Artículo de Revisión</button>
+                <button onclick="app.loadForm('ensayo')">Ensayo / Reflexión</button>
+            </div>
+        </section>
+
+        <section id="form-screen" class="hidden">
+            <button onclick="app.showHome()">⬅ Volver</button>
+            <form id="article-form">
+                </form>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
