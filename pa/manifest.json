@@ -1,1 +1,21 @@
-Se crea el archivo .json para la webapp de redaci´n de artículos acdémicos en una revista
+{
+  "name": "Asistente Editorial UNEA Conexxión",
+  "short_name": "UNEA Artículos",
+  "description": "Herramienta de redacción para la revista científica Conexxión de Aliat Universidades.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#003366",
+  "theme_color": "#003366",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
