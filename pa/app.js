@@ -151,3 +151,12 @@ const app = {
 //        <button type="button" class="btn-primary" style="background:#003366;" onclick="app.exportToPDF()">Exportar PDF</button>
 //    </div>
 // `;
+
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker registrado'))
+      .catch(err => console.log('Error al registrar SW', err));
+  });
+}
