@@ -73,6 +73,10 @@ const app = {
             div.appendChild(label);
             div.appendChild(input);
             formContainer.appendChild(div);
+
+            // Al final de la función loadForm:
+this.loadFromLocalStorage(type); // Intenta cargar si había algo guardado
+this.initAutoSave(type);         // Empieza a escuchar cambios
         });
 
         // Botón de guardar
