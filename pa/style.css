@@ -135,3 +135,36 @@ textarea {
         padding: 1.5rem;
     }
 }
+
+/* style.css */
+@media print {
+    /* Ocultar botones, cabecera y elementos de navegación */
+    header, button, .btn-primary, .logo, hr {
+        display: none !important;
+    }
+
+    body {
+        background-color: white;
+        padding: 0;
+    }
+
+    #form-screen {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    /* Asegurar que el texto sea negro sobre blanco */
+    textarea, input {
+        border: none;
+        padding: 0;
+        font-size: 12pt;
+        color: black;
+    }
+
+    label {
+        color: #003366;
+        margin-top: 20px;
+        font-size: 14pt;
+        border-bottom: 1px solid #003366;
+    }
+}
