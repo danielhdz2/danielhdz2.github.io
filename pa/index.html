@@ -3,35 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Investigación - UNEA</title>
+    <title>Asistente Editorial | UNEA Saltillo</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#003366">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
+
     <header>
-        <div class="logo">ALIAT Universidades | Conexxión</div>
-        <button id="installBtn" style="display:none;">Instalar App</button>
+        <div class="header-content">
+            <span class="logo-text">ALIAT Universidades</span>
+            <span class="sub-text">Revista Conexxión</span>
+        </div>
+        <button id="installBtn" class="btn-install" style="display:none;">Instalar App</button>
     </header>
 
     <main id="app-container">
-        <section id="selector-screen">
-            <h1>Bienvenido, Docente/Alumno</h1>
-            <p>Selecciona el tipo de artículo que deseas redactar:</p>
+        <section id="home-screen">
+            <div class="welcome-card">
+                <h1>Asistente de Investigación</h1>
+                <p>Bienvenido Docente/Alumno de UNEA Saltillo. Inicia la redacción de tu artículo académico siguiendo los lineamientos de la revista Conexxión.</p>
+            </div>
+            
             <div class="grid-options">
-                <button onclick="app.loadForm('original')">Investigación Original</button>
-                <button onclick="app.loadForm('revision')">Artículo de Revisión</button>
-                <button onclick="app.loadForm('ensayo')">Ensayo / Reflexión</button>
+                <div class="card" onclick="app.loadForm('original')">
+                    <h3>Investigación Original</h3>
+                    <p>Artículos con metodología, resultados y discusión.</p>
+                </div>
+                <div class="card" onclick="app.loadForm('revision')">
+                    <h3>Artículo de Revisión</h3>
+                    <p>Análisis crítico de literatura existente (min. 50 ref).</p>
+                </div>
+                <div class="card" onclick="app.loadForm('ensayo')">
+                    <h3>Ensayo / Reflexión</h3>
+                    <p>Posturas teóricas y reflexiones académicas.</p>
+                </div>
             </div>
         </section>
 
         <section id="form-screen" class="hidden">
-            <div id="save-status" style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">
-    Estado: Esperando cambios...
-</div>
-            <button onclick="app.showHome()">⬅ Volver</button>
-            <form id="article-form">
-                </form>
+            <div class="form-header">
+                <button class="btn-back" onclick="app.showHome()">← Volver al inicio</button>
+                <div id="save-status">Esperando cambios...</div>
+            </div>
+            
+            <div class="editor-container">
+                <form id="article-form">
+                    </form>
+            </div>
+
+            <div class="action-bar">
+                <button type="button" class="btn-secondary" onclick="app.clearDraft()">Borrar Borrador</button>
+                <div class="export-group">
+                    <button type="button" class="btn-export doc" onclick="app.exportToWord()">Descargar Word</button>
+                    <button type="button" class="btn-export pdf" onclick="app.exportToPDF()">Descargar PDF</button>
+                </div>
+            </div>
         </section>
     </main>
 
