@@ -1,6 +1,6 @@
 {
-  "name": "Asistente Conexxión UNEA",
-  "short_name": "UNEA Artículos",
+  "name": "Asistente Editorial",
+  "short_name": "Asistente editorial",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#003366",
