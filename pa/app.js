@@ -160,3 +160,53 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Error al registrar SW', err));
   });
 }
+
+// app.js (Ampliación del objeto app)
+
+const app = {
+    // ... (Mantener las funciones previas: loadForm, exportToWord, etc.)
+
+    // 1. Iniciar el monitoreo de cambios en el formulario
+    initAutoSave: function(type) {
+        const form = document.getElementById('article-form');
+        
+        // Escuchar cada vez que el usuario escribe algo
+        form.addEventListener('input', () => {
+            const formData = new FormData(form);
+            const data = {};
+            
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // Guardamos en LocalStorage usando el tipo de artículo como llave
+            localStorage.setItem(`draft_${type}`, JSON.stringify(data));
+            console.log("Progreso guardado automáticamente...");
+        });
+    },
+
+    // 2. Cargar datos guardados si existen
+    loadFromLocalStorage: function(type) {
+        const savedData = localStorage.getItem(`draft_${type}`);
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            
+            // Recorrer el objeto y llenar los campos correspondientes
+            Object.keys(data).forEach(key => {
+                const field = document.getElementById(key);
+                if (field) {
+                    field.value = data[key];
+                }
+            });
+            console.log("Borrador recuperado con éxito.");
+        }
+    },
+
+    // 3. Limpiar el borrador (útil después de una exportación exitosa)
+    clearDraft: function(type) {
+        if(confirm("¿Estás seguro de que deseas borrar este borrador?")) {
+            localStorage.removeItem(`draft_${type}`);
+            location.reload(); // Recarga para limpiar la vista
+        }
+    }
+};
