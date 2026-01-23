@@ -1,1 +1,6 @@
-
+En este proyecto de webapp aulasocial
+- Permite guardar de manera local los avances del proyecto
+- Generar PDF del proyecto
+- Generar Word del proyecto
+- Guardar los avances en el dispositivo
+- Instalar un enlace directo en el dispositivo
