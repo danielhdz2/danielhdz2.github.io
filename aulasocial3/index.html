@@ -1507,7 +1507,7 @@
             month: 'long', 
             day: 'numeric' 
         })}</p>
-        <p>Sistema de Proyectos de Impacto Social - Metodología Design Sprint</p>
+        <p>Sistema de Proyectos de Impacto Social</p>
     </div>
 </body>
 </html>`;
@@ -1520,7 +1520,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${projectData.nombreProyecto || 'proyecto'}_design_sprint.doc`;
+            a.download = `${projectData.nombreProyecto || 'proyecto'}_.doc`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
