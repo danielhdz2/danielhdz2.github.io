@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AulaSocial - Clean Sprint</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Librerías para exportar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-area">
+                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="30" fill="#1565C0"/>
+                    <path d="M20 28 C20 20, 32 14, 32 14 C32 14, 44 20, 44 28 C44 36, 32 46, 32 46 C32 46, 20 36, 20 28Z" fill="#E3F2FD"/>
+                    <circle cx="32" cy="28" r="6" fill="#1565C0"/>
+                    <path d="M16 42 L24 36 L32 40 L40 36 L48 42" stroke="#E3F2FD" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <circle cx="16" cy="42" r="3" fill="#BBDEFB"/>
+                    <circle cx="24" cy="36" r="3" fill="#BBDEFB"/>
+                    <circle cx="32" cy="40" r="3" fill="#BBDEFB"/>
+                    <circle cx="40" cy="36" r="3" fill="#BBDEFB"/>
+                    <circle cx="48" cy="42" r="3" fill="#BBDEFB"/>
+                </svg>
+                <h1>AulaSocial</h1>
+            </div>
+            <p class="header-subtitle">Clean Sprint — Metodología para Proyectos de Impacto Social</p>
+        </div>
+    </header>
+
+    <!-- BARRA DE HERRAMIENTAS -->
+    <nav class="toolbar">
+        <button class="btn btn-primary" id="btnNuevo" title="Nuevo proyecto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            Nuevo
+        </button>
+        <button class="btn btn-secondary" id="btnCargar" title="Cargar proyecto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Cargar
+        </button>
+        <button class="btn btn-secondary" id="btnLista" title="Lista de proyectos">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Lista
+        </button>
+        <button class="btn btn-success" id="btnGuardar" title="Guardar avance">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar Avance
+        </button>
+        <button class="btn btn-warning" id="btnPDF" title="Exportar a PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exportar PDF
+        </button>
+        <button class="btn btn-danger" id="btnWord" title="Exportar a Word">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Exportar Word
+        </button>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+
+        <!-- MODAL CARGAR -->
+        <div class="modal-overlay" id="modalCargar">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>📂 Cargar Proyecto</h2>
+                    <button class="modal-close" id="closeCargar">&times;</button>
+                </div>
+                <div class="modal-body" id="modalCargarBody">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL LISTA -->
+        <div class="modal-overlay" id="modalLista">
+            <div class="modal modal-large">
+                <div class="modal-header">
+                    <h2>📋 Lista de Proyectos</h2>
+                    <button class="modal-close" id="closeLista">&times;</button>
+                </div>
+                <div class="modal-body" id="modalListaBody">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: INFORMACIÓN GENERAL -->
+        <section class="section" id="secInfoGeneral">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">📝</span>
+                    <h2>Información General del Proyecto</h2>
+                </div>
+                <span class="badge" id="statusBadge">Sin guardar</span>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="nombreProyecto">Nombre del Proyecto</label>
+                    <input type="text" id="nombreProyecto" placeholder="Escribe el nombre de tu proyecto...">
+                </div>
+                <div class="form-group">
+                    <label for="nombreEquipo">Nombre del Equipo / Responsable</label>
+                    <input type="text" id="nombreEquipo" placeholder="Ej: Equipo Soluciones Verdes">
+                </div>
+                <div class="form-group">
+                    <label for="nombreFacilitador">Facilitador / Guía</label>
+                    <input type="text" id="nombreFacilitador" placeholder="Nombre del facilitador">
+                </div>
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de Inicio</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+                <div class="form-group">
+                    <label for="estadoProyecto">Estado del Proyecto</label>
+                    <select id="estadoProyecto">
+                        <option value="planificacion">📋 En Planificación</option>
+                        <option value="ejecucion">🔄 En Ejecución</option>
+                        <option value="completado">✅ Completado</option>
+                        <option value="pausado">⏸️ Pausado</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label for="descripcionGeneral">Descripción General / Resumen del Problema Social</label>
+                    <textarea id="descripcionGeneral" rows="4" placeholder="Describe brevemente el problema social que aborda tu proyecto..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARRA DE PROGRESO -->
+        <section class="section section-progress">
+            <div class="progress-bar-container">
+                <div class="progress-label">Progreso del Sprint</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-percent" id="progressPercent">0%</div>
+            </div>
+        </section>
+
+        <!-- ETAPA 1: ENTENDER -->
+        <section class="section section-stage" data-stage="1">
+            <div class="stage-header">
+                <div class="stage-number">1</div>
+                <div class="stage-title-group">
+                    <h2>Entender</h2>
+                    <p>Comprender el problema y su contexto</p>
+                </div>
+                <div class="stage-toggle">▼</div>
+            </div>
+            <div class="stage-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="e1_problema">¿Cuál es el problema que queremos resolver?</label>
+                        <textarea id="e1_problema" rows="4" placeholder="Describe el problema social de manera clara y específica..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="e1_beneficiarios">¿Quiénes son los beneficiarios o usuarios afectados?</label>
+                        <textarea id="e1_beneficiarios" rows="3" placeholder="Describe a las personas o comunidades afectadas..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e1_contexto">Contexto del problema</label>
+                        <textarea id="e1_contexto" rows="4" placeholder="Datos, cifras, contexto geográfico y social..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e1_causas">Causas raíz identificadas</label>
+                        <textarea id="e1_causas" rows="4" placeholder="¿Qué origina este problema?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e1_entrevistas">Entrevistas / Investigación de campo</label>
+                        <textarea id="e1_entrevistas" rows="4" placeholder="Resumen de entrevistas, encuestas o investigaciones realizadas..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e1_howMightWe">Pregunta "¿Cómo podríamos...?"</label>
+                        <textarea id="e1_howMightWe" rows="3" placeholder="Formula tu pregunta de diseño tipo '¿Cómo podríamos...?'"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Imágenes o Gráficos</label>
+                        <div class="image-upload-area" data-stage="1" id="imgArea1">
+                            <input type="file" id="imgInput1" accept="image/*" multiple class="img-input">
+                            <label for="imgInput1" class="img-upload-label">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Arrastra imágenes aquí o haz clic para seleccionar</span>
+                            </label>
+                            <div class="img-preview-container" id="imgPreview1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ETAPA 2: DIVERGIR -->
+        <section class="section section-stage" data-stage="2">
+            <div class="stage-header">
+                <div class="stage-number">2</div>
+                <div class="stage-title-group">
+                    <h2>Divergir</h2>
+                    <p>Generar la mayor cantidad de ideas posibles</p>
+                </div>
+                <div class="stage-toggle">▼</div>
+            </div>
+            <div class="stage-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="e2_lluviaIdeas">Lluvia de ideas (Brainstorming)</label>
+                        <textarea id="e2_lluviaIdeas" rows="5" placeholder="Lista todas las ideas que se te ocurran sin juzgar...&#10;• Idea 1&#10;• Idea 2&#10;• Idea 3..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="e2_ideasCrazy8">Crazy 8's (8 ideas en 8 minutos)</label>
+                        <textarea id="e2_ideasCrazy8" rows="4" placeholder="Describe tus 8 ideas más audaces..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e2_metodosCreativos">Métodos creativos utilizados</label>
+                        <textarea id="e2_metodosCreativos" rows="3" placeholder="SCAMPER, Analogías, Mapas mentales, etc."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e2_observaciones">Observaciones del proceso</label>
+                        <textarea id="e2_observaciones" rows="3" placeholder="¿Qué patrones notaron? ¿Qué sorpresas surgieron?"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Imágenes o Gráficos</label>
+                        <div class="image-upload-area" data-stage="2" id="imgArea2">
+                            <input type="file" id="imgInput2" accept="image/*" multiple class="img-input">
+                            <label for="imgInput2" class="img-upload-label">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Arrastra imágenes aquí o haz clic para seleccionar</span>
+                            </label>
+                            <div class="img-preview-container" id="imgPreview2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ETAPA 3: CONVERGER -->
+        <section class="section section-stage" data-stage="3">
+            <div class="stage-header">
+                <div class="stage-number">3</div>
+                <div class="stage-title-group">
+                    <h2>Converger</h2>
+                    <p>Seleccionar y refinar las mejores ideas</p>
+                </div>
+                <div class="stage-toggle">▼</div>
+            </div>
+            <div class="stage-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="e3_criterios">Criterios de selección</label>
+                        <textarea id="e3_criterios" rows="3" placeholder="¿Qué criterios usaron para evaluar las ideas? (Impacto, viabilidad, costo, etc.)"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="e3_ideaSeleccionada">Idea seleccionada</label>
+                        <textarea id="e3_ideaSeleccionada" rows="4" placeholder="Describe la idea ganadora y por qué fue seleccionada..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e3_votacion">Proceso de votación / decisión</label>
+                        <textarea id="e3_votacion" rows="3" placeholder="¿Cómo decidieron? Votación por puntos, consenso, matriz de decisión..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e3_valorPropuesta">Propuesta de valor</label>
+                        <textarea id="e3_valorPropuesta" rows="3" placeholder="Para [usuario] que [necesidad], nuestro [solución] es [diferenciador] que [beneficio]..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e3_recursos">Recursos necesarios</label>
+                        <textarea id="e3_recursos" rows="3" placeholder="Personas, tecnología, presupuesto, alianzas..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e3_riesgos">Riesgos y mitigación</label>
+                        <textarea id="e3_riesgos" rows="3" placeholder="¿Qué podría salir mal y cómo lo mitigarían?"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Imágenes o Gráficos</label>
+                        <div class="image-upload-area" data-stage="3" id="imgArea3">
+                            <input type="file" id="imgInput3" accept="image/*" multiple class="img-input">
+                            <label for="imgInput3" class="img-upload-label">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Arrastra imágenes aquí o haz clic para seleccionar</span>
+                            </label>
+                            <div class="img-preview-container" id="imgPreview3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ETAPA 4: PROTOTIPAR -->
+        <section class="section section-stage" data-stage="4">
+            <div class="stage-header">
+                <div class="stage-number">4</div>
+                <div class="stage-title-group">
+                    <h2>Prototipar</h2>
+                    <p>Construir una versión tangible de la solución</p>
+                </div>
+                <div class="stage-toggle">▼</div>
+            </div>
+            <div class="stage-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="e4_descripcionProto">Descripción del prototipo</label>
+                        <textarea id="e4_descripcionProto" rows="4" placeholder="Describe qué es tu prototipo y qué aspectos de la solución representa..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e4_tipoProto">Tipo de prototipo</label>
+                        <select id="e4_tipoProto">
+                            <option value="">Seleccionar...</option>
+                            <option value="papel">📄 Prototipo en papel</option>
+                            <option value="digital">💻 Prototipo digital</option>
+                            <option value="maqueta">🏗️ Maqueta física</option>
+                            <option value="roleplay">🎭 Roleplay / Simulación</option>
+                            <option value="storyboard">🎨 Storyboard</option>
+                            <option value="mvp">🚀 MVP (Producto Mínimo Viable)</option>
+                            <option value="otro">📦 Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="e4_materiales">Materiales y herramientas utilizadas</label>
+                        <textarea id="e4_materiales" rows="3" placeholder="Materiales físicos, software, herramientas..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="e4_experienciaUsuario">Experiencia de usuario (User Journey)</label>
+                        <textarea id="e4_experienciaUsuario" rows="4" placeholder="Describe paso a paso cómo el usuario interactúa con tu solución..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e4_hipotesis">Hipótesis a validar</label>
+                        <textarea id="e4_hipotesis" rows="3" placeholder="Creemos que [acción] generará [resultado] para [usuario]..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e4_metricas">Métricas de éxito del prototipo</label>
+                        <textarea id="e4_metricas" rows="3" placeholder="¿Cómo sabrán si el prototipo funciona?"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Imágenes o Gráficos</label>
+                        <div class="image-upload-area" data-stage="4" id="imgArea4">
+                            <input type="file" id="imgInput4" accept="image/*" multiple class="img-input">
+                            <label for="imgInput4" class="img-upload-label">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Arrastra imágenes aquí o haz clic para seleccionar</span>
+                            </label>
+                            <div class="img-preview-container" id="imgPreview4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ETAPA 5: EVALUAR -->
+        <section class="section section-stage" data-stage="5">
+            <div class="stage-header">
+                <div class="stage-number">5</div>
+                <div class="stage-title-group">
+                    <h2>Evaluar</h2>
+                    <p>Probar con usuarios reales e iterar</p>
+                </div>
+                <div class="stage-toggle">▼</div>
+            </div>
+            <div class="stage-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="e5_planPrueba">Plan de prueba</label>
+                        <textarea id="e5_planPrueba" rows="3" placeholder="¿Cómo van a probar el prototipo? ¿Con quién? ¿En qué contexto?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e5_participantes">Participantes de la prueba</label>
+                        <textarea id="e5_participantes" rows="3" placeholder="¿Quiénes participaron? ¿Cuántos? ¿Perfil?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e5_resultados">Resultados obtenidos</label>
+                        <textarea id="e5_resultados" rows="4" placeholder="¿Qué funcionó? ¿Qué no funcionó? Reacciones de los usuarios..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="e5_feedback">Feedback de usuarios (citas textuales)</label>
+                        <textarea id="e5_feedback" rows="4" placeholder="&quot;El usuario dijo que...&quot; — Captura las frases más relevantes"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e5_aprendizajes">Aprendizajes clave</label>
+                        <textarea id="e5_aprendizajes" rows="3" placeholder="¿Qué aprendieron de esta prueba?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="e5_siguientesPasos">Siguientes pasos / Iteraciones</label>
+                        <textarea id="e5_siguientesPasos" rows="3" placeholder="¿Qué van a cambiar o mejorar para la próxima iteración?"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Imágenes o Gráficos</label>
+                        <div class="image-upload-area" data-stage="5" id="imgArea5">
+                            <input type="file" id="imgInput5" accept="image/*" multiple class="img-input">
+                            <label for="imgInput5" class="img-upload-label">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#90CAF9" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <span>Arrastra imágenes aquí o haz clic para seleccionar</span>
+                            </label>
+                            <div class="img-preview-container" id="imgPreview5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 AulaSocial — Clean Sprint para Impacto Social</p>
+    </footer>
+
+    <!-- TEMPLATE PARA EXPORTAR PDF/WORD (oculto) -->
+    <div id="exportTemplate" style="display:none;"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
