@@ -1,57 +1,39 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Profesional</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<title>Super Curling 16-bit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Juego de curling en 2D con estética de consola de 16 bits. Funciona sin conexión.">
+<meta name="theme-color" content="#1d2b53">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Curling">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="photo-container">
-                <img src="tu-foto.jpg" alt="Tu Foto" class="profile-photo">
-            </div>
-            <h1 class="name">Daniel Hernández</h1>
-            <div class="contact-info">
-                <p>📧 danielhdz2@gmail.com</p>
-                <p>📱 +52 844 183 41 27</p>
-                <p>📍 Saltillo, México</p>
-            </div>
-        </header>
-
-        <section class="section">
-            <h2 class="section-title">Formación Académica</h2>
-            <div class="content">
-                <article class="card">
-                    <h3>Título Universitario</h3>
-                    <p class="meta">Universidad XYZ (2015-2019)</p>
-                    <p>Descripción breve de tu formación</p>
-                </article>
-                <article class="card">
-                    <h3>Maestría en Especialidad</h3>
-                    <p class="meta">Instituto ABC (2020-2022)</p>
-                    <p>Logros o enfoque principal</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">Cursos Relevantes</h2>
-            <div class="content grid-courses">
-                <article class="course-card">
-                    <h3>Nombre del Curso 1</h3>
-                    <p class="meta">Institución - Duración</p>
-                    <p>Habilidades adquiridas</p>
-                </article>
-                <article class="course-card">
-                    <h3>Nombre del Curso 2</h3>
-                    <p class="meta">Institución - Duración</p>
-                    <p>Tecnologías dominadas</p>
-                </article>
-            </div>
-        </section>
-    </div>
+<main class="con">
+  <div class="bez"><canvas id="c" width="256" height="224" aria-label="Pantalla del juego de curling"></canvas></div>
+  <div class="brand"><span>SUPER CURLING</span><small>16-BIT</small></div>
+  <div class="pad">
+    <div class="dp"><button class="u" data-k="u" aria-label="Arriba">▲</button><button class="l" data-k="l" aria-label="Izquierda">◀</button><i></i><button class="r" data-k="r" aria-label="Derecha">▶</button><button class="d" data-k="d" aria-label="Abajo">▼</button></div>
+    <div class="mid"><button data-k="s">START</button></div>
+    <div class="ab"><button data-k="b">B</button><button class="a" data-k="a">A</button></div>
+  </div>
+  <p class="help">Teclado: ←/→ apuntar · ↑/↓ girar la piedra · mantén A o Espacio para cargar y suelta para lanzar · mantén Z para barrer · Enter = Start</p>
+  <div class="pwa">
+    <span id="estado" role="status">En línea</span>
+    <button id="btn-instalar" type="button" hidden>Instalar app</button>
+    <span id="ayuda-ios" hidden>En iPhone: toca Compartir y luego Agregar a inicio.</span>
+  </div>
+</main>
+<script src="js/game.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
