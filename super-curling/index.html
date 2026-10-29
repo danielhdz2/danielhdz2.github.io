@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>Super Curling 16-bit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Juego de curling en 2D con estética de consola de 16 bits. Funciona sin conexión.">
+<meta name="theme-color" content="#1d2b53">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Curling">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<main class="con">
+  <div class="bez"><canvas id="c" width="256" height="224" aria-label="Pantalla del juego de curling"></canvas></div>
+  <div class="brand"><span>SUPER CURLING</span><small>16-BIT</small></div>
+  <div class="pad">
+    <div class="dp"><button class="u" data-k="u" aria-label="Arriba">▲</button><button class="l" data-k="l" aria-label="Izquierda">◀</button><i></i><button class="r" data-k="r" aria-label="Derecha">▶</button><button class="d" data-k="d" aria-label="Abajo">▼</button></div>
+    <div class="mid"><button data-k="s">START</button></div>
+    <div class="ab"><button data-k="b">B</button><button class="a" data-k="a">A</button></div>
+  </div>
+  <p class="help">Teclado: ←/→ apuntar · ↑/↓ girar la piedra · mantén A o Espacio para cargar y suelta para lanzar · mantén Z para barrer · Enter = Start</p>
+  <div class="pwa">
+    <span id="estado" role="status">En línea</span>
+    <button id="btn-instalar" type="button" hidden>Instalar app</button>
+    <span id="ayuda-ios" hidden>En iPhone: toca Compartir y luego Agregar a inicio.</span>
+  </div>
+</main>
+<script src="js/game.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
