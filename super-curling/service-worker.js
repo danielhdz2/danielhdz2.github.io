@@ -1,4 +1,4 @@
-const CACHE_NAME = 'super-curling-v1';
+const CACHE_NAME = 'super-curling-v2';
 const APP_SHELL = [
   './', './index.html', './css/styles.css', './js/game.js', './js/app.js', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-192.png',

@@ -13,7 +13,20 @@ let AC;function beep(f,d,ty){try{AC=AC||new(window.AudioContext||window.webkitAu
 let st='title',stones=[],turn=0,endN=1,score=[0,0],ang=0,spin=0,pw=0,pd=1,cur=null,tm=0,msg='',mt=0,tick=0;
 const speck=Array.from({length:70},(_,i)=>[64+(i*37%126),(i*53%220),i%3]);
 
-function newGame(){stones=[];turn=0;endN=1;score=[0,0];ang=0;spin=0;st='aim';beep(660,.1);}
+const NE=10;
+const EQ=[
+  {c:'MX',n:'MEXICO',k:['#2fa84f','#e63946']},
+  {c:'BR',n:'BRASIL',k:['#ffd23f','#2fa84f']},
+  {c:'CO',n:'COLOMBIA',k:['#ffd23f','#3b6fd8']},
+  {c:'PT',n:'PORTUGAL',k:['#e63946','#2fa84f']},
+  {c:'CA',n:'CANADA',k:['#e63946','#f4f4f4']}
+];
+let tsel=0,TM=[0,1],TC=['#e63946','#ffd23f'];
+function newGame(){
+  let c;do{c=Math.floor(Math.random()*EQ.length)}while(c==tsel);
+  TM=[tsel,c];TC[0]=EQ[tsel].k[0];TC[1]=EQ[c].k[0]==TC[0]?EQ[c].k[1]:EQ[c].k[0];
+  stones=[];turn=0;endN=1;score=[0,0];ang=0;spin=0;st='aim';beep(660,.1);
+}
 function launch(t,v,a,sp){cur={x:CX,y:OY,vx:v*Math.sin(a),vy:-v*Math.cos(a),t,spin:sp,alive:1};stones.push(cur);st='move';mt=0;beep(220,.12,'triangle');}
 function cpuThrow(){
   let tx=CX+Math.random()*24-12,ty=BY;
@@ -59,17 +72,23 @@ function scoreEnd(){
   const l=stones.filter(s=>s.alive&&Math.hypot(s.x-CX,s.y-BY)<R+36)
     .sort((a,b)=>Math.hypot(a.x-CX,a.y-BY)-Math.hypot(b.x-CX,b.y-BY));
   if(!l.length)msg='SIN PUNTOS';
-  else{const t=l[0].t;let n=0;while(n<l.length&&l[n].t==t)n++;score[t]+=n;msg=(t?'AMARILLO':'ROJO')+' +'+n;}
+  else{const t=l[0].t;let n=0;while(n<l.length&&l[n].t==t)n++;score[t]+=n;msg=EQ[TM[t]].n+' +'+n;}
   st='end';tm=170;beep(520,.2);
 }
 function nextEnd(){
-  if(endN>=3){st='over';beep(784,.4);return;}
+  if(endN>=NE){st='over';beep(784,.4);return;}
   endN++;stones=[];turn=0;ang=0;spin=0;st='aim';
 }
 function update(){
   tick++;
   for(const k in K)if(!K[k])P[k]=0;
-  if(st=='title'){if(pr('s')||pr('a'))newGame();return;}
+  if(st=='title'){if(pr('s')||pr('a')){st='team';beep(660,.1);}return;}
+  if(st=='team'){
+    if(pr('l')||pr('u')){tsel=(tsel+EQ.length-1)%EQ.length;beep(440,.05);}
+    if(pr('r')||pr('d')){tsel=(tsel+1)%EQ.length;beep(440,.05);}
+    if(pr('s')||pr('a'))newGame();
+    return;
+  }
   if(st=='over'){if(pr('s'))st='title';return;}
   if(st=='end'){if(--tm<=0)nextEnd();return;}
   if(st=='aim'){
@@ -90,12 +109,24 @@ function T(s,x,y,c,z,al){g.font=(z||8)+"px 'Press Start 2P',monospace";g.fillSty
 function circ(x,y,r,c){g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill();}
 function stone(s){
   g.fillStyle='rgba(0,40,80,.25)';g.beginPath();g.ellipse(s.x+1.5,s.y+2,R,R-1,0,0,7);g.fill();
-  circ(s.x,s.y,R,'#8c8c9a');circ(s.x,s.y,R-1.5,s.t?'#ffd23f':'#e63946');
+  circ(s.x,s.y,R,'#8c8c9a');circ(s.x,s.y,R-1.5,s.col||TC[s.t]);
   g.fillStyle='#fff';g.fillRect(Math.round(s.x)-2,Math.round(s.y)-2,2,2);
 }
 function box(y,h){g.fillStyle='#000';g.fillRect(24,y,208,h);g.strokeStyle='#fff';g.lineWidth=1;g.strokeRect(24.5,y+.5,207,h-1);}
 function draw(){
   g.fillStyle='#1d2b53';g.fillRect(0,0,256,224);
+  if(st=='team'){
+    T('ELIGE TU EQUIPO',CX,14,'#ffd23f',8,'center');
+    EQ.forEach((e,i)=>{
+      const y=36+i*26;
+      if(i==tsel){g.fillStyle='#3b6fd8';g.fillRect(40,y-5,176,22);T('>',46,y+2,'#fff');}
+      stone({x:72,y:y+6,t:0,col:e.k[0]});
+      T(e.c,88,y+2,'#fff');T(e.n,112,y+2,i==tsel?'#fff':'#9fd3f0');
+    });
+    T('A: ELEGIR',CX,178,'#fff',8,'center');
+    T('RIVAL: AL AZAR',CX,196,'#9fd3f0',8,'center');
+    return;
+  }
   if(st=='title'){
     circ(CX,160,44,'#3b6fd8');circ(CX,160,30,'#f4f4f4');circ(CX,160,16,'#e63946');circ(CX,160,5,'#f4f4f4');
     stone({x:CX+30,y:132,t:0});stone({x:CX-34,y:176,t:1});
@@ -126,11 +157,11 @@ function draw(){
     stone({x:CX,y:OY,t:0});
   }
   // HUD izquierda
-  T('ROJO',4,10,'#e63946');T(String(score[0]),4,22,'#fff',12);
-  T('AMAR',4,44,'#ffd23f');T(String(score[1]),4,56,'#fff',12);
-  T('TANDA',4,82,'#9fd3f0');T(endN+'/3',4,94,'#fff');
+  T(EQ[TM[0]].c,4,10,TC[0]);T(String(score[0]),4,22,'#fff',12);
+  T(EQ[TM[1]].c,4,44,TC[1]);T(String(score[1]),4,56,'#fff',12);
+  T('TANDA',4,82,'#9fd3f0');T(endN+'/'+NE,4,94,'#fff');
   T('GIRO',4,118,'#9fd3f0');T(spin<0?'<<':spin>0?'>>':'--',4,130,'#fff');
-  T('TURNO',4,156,'#9fd3f0');T(turn%2==0?'TU':'CPU',4,168,turn%2==0?'#e63946':'#ffd23f');
+  T('TURNO',4,156,'#9fd3f0');T(turn%2==0?'TU':'CPU',4,168,TC[turn%2]);
   // HUD derecha
   const rl=4-stones.filter(s=>s.t==0).length,yl=4-stones.filter(s=>s.t==1).length;
   T('QUEDAN',202,10,'#9fd3f0',7);
