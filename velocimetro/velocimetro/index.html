@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <title>Velocímetro GPS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Velocímetro GPS en km/h y mph con alarma de límite de velocidad. Funciona sin conexión.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Velocímetro">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Velocímetro</h1>
+    <div class="chips">
+      <span class="chip" id="gpsChip" data-state="idle">GPS: apagado</span>
+      <span class="chip" id="netChip" data-state="on">En línea</span>
+      <button class="btn-small" id="installBtn" hidden>Instalar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="alarm-banner" id="alarmBanner" role="alert" hidden>⚠ ¡Límite de velocidad excedido!</div>
+
+    <section class="gauge" aria-label="Velocidad actual">
+      <svg viewBox="0 0 220 220" aria-hidden="true">
+        <circle class="track" cx="110" cy="110" r="90" transform="rotate(135 110 110)"/>
+        <circle class="value" id="arc" cx="110" cy="110" r="90" transform="rotate(135 110 110)"/>
+      </svg>
+      <div class="reading">
+        <output id="speed" aria-live="off">0</output>
+        <span id="unitLabel">km/h</span>
+        <small id="limitLabel">Límite: 90 km/h</small>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Estadísticas del viaje">
+      <div><span>Máxima</span><b id="maxSpeed">0</b></div>
+      <div><span>Promedio</span><b id="avgSpeed">0</b></div>
+      <div><span>Distancia</span><b id="distance">0.00</b></div>
+      <div><span>Precisión</span><b id="accuracy">—</b></div>
+    </section>
+
+    <section class="panel" aria-label="Configuración">
+      <div class="row">
+        <span class="label">Unidad</span>
+        <div class="segmented" role="group" aria-label="Unidad de velocidad">
+          <button type="button" data-unit="kmh" aria-pressed="true">km/h</button>
+          <button type="button" data-unit="mph" aria-pressed="false">mph</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="label" for="limitInput">Límite</label>
+        <div class="stepper">
+          <button type="button" id="limitMinus" aria-label="Bajar límite">−</button>
+          <input id="limitInput" type="number" inputmode="numeric" min="1" max="400" step="1" value="90">
+          <button type="button" id="limitPlus" aria-label="Subir límite">+</button>
+        </div>
+      </div>
+
+      <div class="row toggles">
+        <label><input type="checkbox" id="alarmOn" checked> Alarma</label>
+        <label><input type="checkbox" id="soundOn" checked> Sonido</label>
+        <label><input type="checkbox" id="vibrateOn" checked> Vibrar</label>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="startBtn">Iniciar</button>
+        <button type="button" class="btn" id="resetBtn">Reiniciar viaje</button>
+        <button type="button" class="btn" id="testBtn">Probar alarma</button>
+      </div>
+      <p class="hint" id="hint">Mantén la pantalla encendida mientras conduces. El GPS no consume datos móviles.</p>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+/* Sin fuentes ni recursos externos: cero datos extra. */
+:root {
+  --bg: #0f172a;
+  --bg-elevated: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --primary: #22d3ee;
+  --accent: #f59e0b;
+  --danger: #ef4444;
+  --ok: #22c55e;
+  --radius: 18px;
+  --shadow: 0 8px 28px rgba(0, 0, 0, .35);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f1f5f9; --bg-elevated: #ffffff; --text: #0f172a; --text-muted: #64748b;
+    --primary: #0891b2; --shadow: 0 8px 28px rgba(15, 23, 42, .10);
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--text);
+  min-height: 100dvh; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  transition: background-color .25s ease;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+body.alarm { animation: flash 1s steps(2, jump-none) infinite; }
+@keyframes flash { 0% { background: var(--bg); } 100% { background: #7f1d1d; } }
+@media (prefers-reduced-motion: reduce) { body.alarm { animation: none; background: #7f1d1d; } }
+
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 4px; }
+.top h1 { font-size: 1.1rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: .72rem; padding: 4px 10px; border-radius: 999px; background: var(--bg-elevated); color: var(--text-muted); }
+.chip[data-state="on"], .chip[data-state="ok"] { color: var(--ok); }
+.chip[data-state="wait"] { color: var(--accent); }
+.chip[data-state="off"], .chip[data-state="error"] { color: var(--danger); }
+.btn-small { font: inherit; font-size: .75rem; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer; }
+
+main { flex: 1; display: grid; gap: 14px; padding: 8px 16px 20px; max-width: 560px; width: 100%; margin: 0 auto; align-content: start; }
+
+.alarm-banner { background: var(--danger); color: #fff; font-weight: 700; text-align: center; padding: 12px; border-radius: var(--radius); }
+
+.gauge { position: relative; width: min(78vw, 340px); aspect-ratio: 1; margin: 0 auto; }
+.gauge svg { width: 100%; height: 100%; }
+.gauge circle { fill: none; stroke-width: 16; stroke-linecap: round; }
+.gauge .track { stroke: var(--bg-elevated); stroke-dasharray: 424.1 565.5; }
+.gauge .value { stroke: var(--primary); stroke-dasharray: 0 565.5; transition: stroke-dasharray .35s ease, stroke .2s ease; }
+body.alarm .gauge .value { stroke: var(--danger); }
+.reading { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding-bottom: 6%; }
+.reading output { font-family: var(--mono); font-weight: 700; font-size: clamp(4rem, 22vw, 7.5rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.reading span { font-size: 1.2rem; color: var(--primary); font-weight: 600; margin-top: 2px; }
+.reading small { color: var(--text-muted); margin-top: 8px; font-size: .85rem; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stats div { background: var(--bg-elevated); border-radius: 14px; padding: 10px 6px; text-align: center; box-shadow: var(--shadow); }
+.stats span { display: block; font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.stats b { display: block; font-family: var(--mono); font-size: 1.05rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+.panel { background: var(--bg-elevated); border-radius: var(--radius); padding: 16px; display: grid; gap: 14px; box-shadow: var(--shadow); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.label { font-size: .9rem; color: var(--text-muted); }
+
+.segmented { display: inline-flex; background: var(--bg); border-radius: 12px; padding: 3px; }
+.segmented button { font: inherit; border: 0; background: transparent; color: var(--text-muted); padding: 8px 18px; border-radius: 9px; cursor: pointer; transition: background .15s, color .15s; }
+.segmented button[aria-pressed="true"] { background: var(--primary); color: #04202a; font-weight: 700; }
+
+.stepper { display: inline-flex; align-items: center; gap: 6px; }
+.stepper button { font: inherit; font-size: 1.4rem; width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--bg); color: var(--text); cursor: pointer; }
+.stepper button:active { transform: scale(.94); }
+.stepper input { font: inherit; font-family: var(--mono); font-size: 1.2rem; width: 80px; height: 44px; text-align: center; border-radius: 12px; border: 1px solid transparent; background: var(--bg); color: var(--text); user-select: text; }
+
+.toggles { justify-content: space-between; font-size: .9rem; }
+.toggles label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.toggles input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn { font: inherit; font-weight: 600; padding: 14px; border-radius: 14px; border: 0; background: var(--bg); color: var(--text); cursor: pointer; transition: transform .15s ease, filter .15s ease; }
+.btn:active { transform: scale(.97); }
+.btn.primary { grid-column: 1 / -1; background: var(--primary); color: #04202a; font-size: 1.1rem; }
+.btn.primary.running { background: var(--danger); color: #fff; }
+.hint { font-size: .78rem; color: var(--text-muted); text-align: center; }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  main { max-width: 980px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .alarm-banner, .stats { grid-column: 1 / -1; }
+  .gauge { width: min(55vh, 300px); }
+  .reading output { font-size: clamp(3rem, 18vh, 5.5rem); }
+}
